@@ -51,7 +51,13 @@ Player (CharacterBody2D, 继承 BaseCharacter.tscn)
   新增发射器或 PCam 时两侧至少要有一层对应，否则噪声被静默丢弃。
 - amplitude/frequency/duration 当前值为手感初值（阶段⑤实机标定），后续可继续微调。
 
-## 4. 边界与限制用法
+## 4. 重生瞬移
+
+玩家重生（死亡回出生点 / 落坑即死重生）时阻尼相机会平滑横穿全图——`CameraRig`（表现层）
+订阅 `Character.Respawned`，调用 PCam 的 `teleport_position()` 硬切到重生点。相机改动与玩家
+死亡流程解耦：没有 CameraRig 的角色重生不产生相机行为。
+
+## 5. 边界与限制用法
 
 - pcam 的 `limit_left/top/right/bottom` 为整数像素，必须与关卡几何对齐；
   当前关卡 ×2 后可活动区域为 (0,0)-(1280,720)，与视口一致，相机实际不滚动。

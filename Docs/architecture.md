@@ -22,10 +22,13 @@ Game/
 │   ├── InputIntent.cs           # 意图层（readonly struct）
 │   ├── CharacterPresenter.cs    # 表现层：动画/朝向/尘土/无敌闪烁
 │   ├── ScreenShake.cs           # 表现层：命中/受击 → 相机噪声发射器
+│   ├── CameraRig.cs             # 表现层：重生 → 相机瞬移
 │   ├── Combat/                  # 战斗子系统：DamageInfo / Health / Hitbox / Hurtbox
 │   ├── InputSources/            # 输入层：InputSource 抽象 + Player / SlimeAI 两实现
 │   └── States/                  # 类式状态机：CharacterState 基类 + 6 个行为状态
-└── Scenes/                  # BaseCharacter（基座）+ Player / Slime（继承）+ TestLevel（主场景）
+├── Gameplay/World/          # 关卡类玩法物件（KillZone 即死区）
+└── Scenes/                  # Main（应用编排）+ BaseCharacter（基座）+ Player / Slime（继承）+ TestLevel
+Game/UI/                     # UI 层（命名空间 GodotGameTemplate.UI）：Main 编排 + 主菜单/暂停/HUD
 Tools/
 ├── generate_placeholder_art.py  # 占位图生成（16×16 ASCII 网格 → 最近邻 ×2 输出 32×32）
 └── headless_probe/              # 回归探针：脚本化输入 + 8 项 PASS/FAIL（见 §7）
@@ -57,7 +60,7 @@ InputSource  ──▶  InputIntent  ──▶  CharacterMotor + States   ──
 6. `_presenter?.Sync()` —— 逻辑 → 表现（动画/朝向/闪烁）
 
 表现层的尘土与震屏不占帧序位置：由逻辑层事件（`Jumped`/`Landed`/`AttackStarted`/
-`HitConfirmed`/`Damaged`）驱动，事件是逻辑层对表现层的唯一出口。
+`HitConfirmed`/`Damaged`/`Respawned`）驱动，事件是逻辑层对表现层的唯一出口。
 
 **关键原则：逻辑层不碰引擎类型**（`Godot.Vector2` 等纯数学类型除外）。
 Motor、States、Health、DamageInfo 全是纯 C#，不引用任何 Node/Resource——这是 §7 单元测试的前提。
@@ -92,9 +95,13 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 ```
 
 - 同一次挥击对同一目标只结算一次（`Hitbox` 内 HashSet）；`HitConfirmed` 只在真实结算后触发，
-  挥空不触发——表现层据此做命中反馈。
+  挥空与拒伤（无敌/尸体）都不触发——表现层据此做命中反馈。
+- **攻击数值唯一事实源是 `AttackConfig`**（伤害/击退），由编排者在装配时经 `Hitbox.Configure`
+  下发；`Hitbox` 自身不持有可调数值。
 - `DamageInfo.Create(damage, knockbackHorizontal, knockbackVertical, sourceDirection)`：
   击退方向由 `sourceDirection`（攻击者→受击者的水平符号）决定。
+- **死亡来源有两种**：血量归零（`Health.Died`）与环境即死（`World/KillZone`，落坑不扣血直接
+  `KillInstantly`）；两者汇入同一条死亡调度（死亡动画 → 敌人 1s 消失 / 玩家回出生点重生）。
 - 死亡差异：敌人 `QueueFree` 消失；玩家回出生点、回满 HP、`Motor.Reset()`。
   玩家身份由输入源类型推导（`_inputSource is PlayerInputSource`），无标记字段。
 - **物理层**（project.godot 命名）：
@@ -106,13 +113,17 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 | 3 | player_hurtbox | 玩家受击盒（敌人 Hitbox 的 mask） |
 | 4 | enemy_hurtbox | 敌人受击盒（玩家 Hitbox 的 mask） |
 
-## 5. 表现层
+## 5. 表现层与 UI
 
 - `CharacterPresenter`：读 `Motor.VisualState` 播放同名动画（枚举名小写即动画名）、
   按 `Facing` 翻转 Pivot（精灵与命中盒一起换边）、无敌帧闪烁、跳/落地尘土。
 - `ScreenShake`：`Hitbox.HitConfirmed` → 攻击抖动、`Health.Damaged` → 受击抖动；
   `Enabled` 总开关。噪声参数在 `Game/Config/shake_*.tres`。
+- `CameraRig`：订阅玩家 `Respawned`，调用 PCam `teleport_position()` 硬切相机。
 - 相机跟随、边界限制、噪声到屏幕的链路：见 [camera-design.md](camera-design.md)。
+- **UI 层（`Game/UI/`）**：`Main`（应用编排，process_mode=Always）持有主菜单/暂停菜单/HUD；
+  关卡实例挂 Pausable 的 LevelRoot——Esc 暂停 = `get_tree().Paused`，菜单仍可交互。
+  `Hud` 订阅 `Health.HealthChanged/Died` 渲染心形血条，死亡重生回满自洽。详见 §11。
 
 ## 6. 装配策略
 
@@ -126,10 +137,10 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 
 ## 7. 测试与验证
 
-- **单元测试**（25 个）：`Tests/UnitTests/`，纯 C# 零场景依赖。
+- **单元测试**（28 个）：`Tests/UnitTests/`，纯 C# 零场景依赖。
   测试配置用 `TestConfig()` 直接构造 `CharacterConfigData`（固定尺度数值），
   以 delta 逐帧驱动 Motor 断言速度/状态/事件。覆盖：跳跃手感三件套、
-  冲刺/攻击互斥、受击打断、无敌帧、死亡终态、配置缺失降级。
+  冲刺/攻击互斥、受击打断、无敌帧、死亡终态、配置缺失降级、生命变化事件。
 - **headless 探针**（8 项）：`Tools/headless_probe`，脚本化输入驱动真实场景做端到端回归：
 
   ```bash
@@ -138,8 +149,8 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
       --headless --path . Tools/headless_probe/Probe.tscn
   ```
 
-  覆盖：自然落地、跳跃高度（≥90px）、跳上平台、宽坑不落、窄坑穿越、
-  追击出招、命中玩家 HP 下降。全过退出码 0。
+  覆盖：自然落地、跳跃高度（≥90px）、跳上平台、落坑即死并重生回出生点、宽坑不落、
+  窄坑穿越、追击出招、命中玩家 HP 下降。全过退出码 0。
 - **CI**（GitHub Actions）：`format-check`（CSharpier）+ `build-and-test`（Release 构建 + 单测）。
 
 ## 8. 扩展指南：新增一种敌人（约 1 小时）
@@ -181,7 +192,26 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 4. **动画**：两个 `frames.tres` 加同名动画。
 5. **测试**：`CharacterMotorTests` 补互斥用例（进入条件、被谁打断、结束去向），`dotnet test` + 探针。
 
-## 10. 文档索引
+## 10. UI 与关卡流
+
+`Game/Scenes/Main.tscn` 是应用根（主场景）：
+
+```
+Main (Node, process_mode=Always)          ← Esc 处理、生命周期切换
+├── UiLayer (CanvasLayer, Always)         ← 暂停时菜单仍可交互
+│   ├── MainMenu（开始/退出）
+│   ├── PauseMenu（继续/回主菜单，默认隐藏）
+│   └── Hud（开局后实例化并 Bind 玩家 Health）
+└── LevelRoot (Node, Pausable)            ← 关卡实例（名字固定 Level）
+```
+
+- 开始游戏：释放菜单 → 实例化 `TestLevel` 到 LevelRoot → 实例化 Hud 并绑定玩家 Health。
+- Esc：游玩中 `get_tree().Paused = true` + 暂停菜单；暂停中 Esc 或「继续」恢复。
+- 回主菜单：Unpause → 释放关卡与 HUD → 显示主菜单。
+- 玩家死亡 → 现有自动重生（回出生点、回满血、相机瞬移）即「死亡→重开」闭环。
+- 探针（`Tools/headless_probe`）直接实例化 TestLevel，不经过 Main——UI 改动不影响探针。
+
+## 11. 文档索引
 
 | 文档 | 定位 |
 |---|---|

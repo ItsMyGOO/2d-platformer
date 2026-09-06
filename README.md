@@ -12,8 +12,10 @@ Godot 4.6 + C#（net8.0）的 2D 横板平台跳跃，按「工程质量优先�
 | 跳跃 | 空格 或 ↑（短按小跳、长按大跳） |
 | 冲刺 | Shift 或 X |
 | 攻击 | J 或 鼠标左键 |
+| 暂停 | Esc |
 
-击中敌人会触发相机命中震屏（参数见 `Docs/camera-design.md`，可调可关）。
+击中敌人会触发相机命中震屏（参数见 `Docs/camera-design.md`，可调可关）；
+掉进坑里即死（不扣血），回出生点重生、血量回满。
 
 ## 环境要求
 
@@ -25,15 +27,15 @@ Godot 4.6 + C#（net8.0）的 2D 横板平台跳跃，按「工程质量优先�
 
 ```bash
 dotnet build                 # 构建（零 Error 才可提交）
-dotnet test                  # 25 个单元测试（纯 C#，无场景依赖）
+dotnet test                  # 28 个单元测试（纯 C#，无场景依赖）
 ```
 
-用 Godot 打开项目直接 F5 运行（主场景 `Game/Scenes/TestLevel.tscn`）。
+用 Godot 打开项目直接 F5 运行（主场景 `Game/Scenes/Main.tscn`：主菜单 → 开始游戏）。
 
 ## 回归探针
 
-headless 探针脚本化驱动输入，8 项检查逐条输出 PASS/FAIL（跳跃高度、跳上平台、
-窄坑穿越、宽坑调头、追击出招、命中扣血等），全过退出码 0：
+headless 探针脚本化驱动输入，9 项检查逐条输出 PASS/FAIL（跳跃高度、跳上平台、
+落坑死亡重生、窄坑穿越、宽坑调头、追击出招、命中扣血等），全过退出码 0：
 
 ```bash
 dotnet build
@@ -59,5 +61,6 @@ GitHub Actions 两个 job：`format-check`（CSharpier 检查）+ `build-and-tes
 | [Docs/code-standards.md](Docs/code-standards.md) | 代码规范与提交约定 |
 | [Docs/engineering-roadmap.md](Docs/engineering-roadmap.md) | 工程路线图（六阶段已收官，下一期候选见 §5） |
 
-工程履历：阶段⓪-⑥（资源补齐 → 代码规范 → 测试基建 → CI → 32×32 美术与世界 ×2 →
-Phantom Camera 相机与震屏 → 文档收尾）已全部完成，各阶段实施计划在 `Docs/plans/`。
+工程履历：工程地基阶段⓪-⑥（资源补齐 → 代码规范 → 测试基建 → CI → 32×32 美术与世界 ×2 →
+Phantom Camera 相机与震屏 → 文档收尾）已全部完成；第二期交付 UI 闭环 + 落坑即死 + 战斗代码
+审计加固。各期实施计划在 `Docs/plans/`。
