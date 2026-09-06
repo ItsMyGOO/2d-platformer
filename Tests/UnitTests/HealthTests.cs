@@ -91,4 +91,50 @@ public class HealthTests
         Assert.Equal(5, health.CurrentHP);
         Assert.False(health.IsDead);
     }
+
+    [Fact]
+    public void TryApplyDamage_RaisesHealthChanged_WithNewHp()
+    {
+        var health = new Health(maxHP: 5, invincibilityTime: 0.8f);
+        int changedCount = 0;
+        int lastHp = 0;
+        health.HealthChanged += hp =>
+        {
+            changedCount++;
+            lastHp = hp;
+        };
+
+        health.TryApplyDamage(Hit(damage: 2));
+
+        Assert.Equal(1, changedCount);
+        Assert.Equal(3, lastHp);
+    }
+
+    [Fact]
+    public void KillingBlow_DoesNotRaiseHealthChanged()
+    {
+        var health = new Health(maxHP: 2, invincibilityTime: 0f);
+        int changedCount = 0;
+        int diedCount = 0;
+        health.HealthChanged += _ => changedCount++;
+        health.Died += () => diedCount++;
+
+        health.TryApplyDamage(Hit(damage: 2));
+
+        Assert.Equal(1, diedCount);
+        Assert.Equal(0, changedCount); // 血量归零由 Died 表达，不重复通知
+    }
+
+    [Fact]
+    public void RestoreFull_RaisesHealthChanged_WithMaxHp()
+    {
+        var health = new Health(maxHP: 5, invincibilityTime: 0.8f);
+        health.TryApplyDamage(Hit(damage: 3));
+        int lastHp = 0;
+        health.HealthChanged += hp => lastHp = hp;
+
+        health.RestoreFull();
+
+        Assert.Equal(5, lastHp);
+    }
 }

@@ -28,6 +28,9 @@ public class Health
     /// <summary>致命一击时触发一次（该次不触发 Damaged）。</summary>
     public event Action Died;
 
+    /// <summary>生命值发生任何变化（受伤结算 / 回满）时触发，携带当前血量。</summary>
+    public event Action<int> HealthChanged;
+
     public Health(int maxHP, float invincibilityTime)
     {
         if (maxHP <= 0)
@@ -59,10 +62,11 @@ public class Health
         _invincibilityTimer = _invincibilityTime;
         if (CurrentHP <= 0)
         {
-            Died?.Invoke();
+            Died?.Invoke(); // 血量归零由 Died 表达，不重复发 HealthChanged
         }
         else
         {
+            HealthChanged?.Invoke(CurrentHP);
             Damaged?.Invoke(info);
         }
         return true;
@@ -73,5 +77,6 @@ public class Health
     {
         CurrentHP = MaxHP;
         _invincibilityTimer = _invincibilityTime;
+        HealthChanged?.Invoke(CurrentHP);
     }
 }

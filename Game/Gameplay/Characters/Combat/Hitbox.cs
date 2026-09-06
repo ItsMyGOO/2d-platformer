@@ -6,24 +6,27 @@ namespace GodotGameTemplate.Gameplay.Characters.Combat;
 
 /// <summary>
 /// 攻击判定框：攻击激活窗口内每物理帧轮询重叠区域，命中 Hurtbox 结算伤害。
-/// 同一次挥击对同一目标只结算一次。判定数值在场景中按角色配置。
+/// 同一次挥击对同一目标只结算一次。伤害与击退数值由编排者从角色配置下发（唯一事实源）。
 /// </summary>
 public partial class Hitbox : Area2D
 {
-    [Export]
-    private int _damage = 1;
-
-    [Export]
-    private float _knockbackHorizontal = 160f;
-
-    [Export]
-    private float _knockbackVertical = 120f;
+    private int _damage;
+    private float _knockbackHorizontal;
+    private float _knockbackVertical;
 
     private readonly HashSet<Hurtbox> _hitThisSwing = new();
     private ColorRect _debugVisual;
 
-    /// <summary>命中确认：每次实际结算伤害后触发一次（表现层用作命中反馈）。</summary>
+    /// <summary>命中确认：每次真实结算成功（非无敌/非尸体拒伤）后触发，表现层用作命中反馈。</summary>
     public event Action HitConfirmed;
+
+    /// <summary>由编排者下发攻击数值（来源 AttackConfig）。</summary>
+    public void Configure(int damage, float knockbackHorizontal, float knockbackVertical)
+    {
+        _damage = damage;
+        _knockbackHorizontal = knockbackHorizontal;
+        _knockbackVertical = knockbackVertical;
+    }
 
     public override void _Ready()
     {
@@ -64,10 +67,19 @@ public partial class Hitbox : Area2D
                 {
                     direction = 1f;
                 }
-                hurtbox.ReceiveHit(
-                    DamageInfo.Create(_damage, _knockbackHorizontal, _knockbackVertical, direction)
-                );
-                HitConfirmed?.Invoke();
+                if (
+                    hurtbox.ReceiveHit(
+                        DamageInfo.Create(
+                            _damage,
+                            _knockbackHorizontal,
+                            _knockbackVertical,
+                            direction
+                        )
+                    )
+                )
+                {
+                    HitConfirmed?.Invoke(); // 只在真实结算（拒伤不计）时确认命中
+                }
             }
         }
     }

@@ -52,6 +52,14 @@ public partial class Character : CharacterBody2D
         Motor = new CharacterMotor(_config.ToData());
         Motor.AttackStarted += () => _hitbox?.BeginSwing();
         Motor.AttackActiveChanged += active => _hitbox?.SetActive(active);
+        if (_config.Attack != null)
+        {
+            _hitbox?.Configure(
+                _config.Attack.Damage,
+                _config.Attack.KnockbackHorizontal,
+                _config.Attack.KnockbackVertical
+            );
+        }
         _presenter?.Bind(Motor, Health);
         _screenShake = this.FindDescendant<ScreenShake>();
         _screenShake?.Bind(Health, _hitbox);
@@ -100,13 +108,15 @@ public partial class Character : CharacterBody2D
         }
     }
 
-    /// <summary>受击入口（Hurtbox 转发或测试直调）：先过无敌帧与死亡判定，再进硬直。</summary>
-    public void OnHurt(DamageInfo info)
+    /// <summary>受击入口（Hurtbox 转发或测试直调）：先过无敌帧与死亡判定，结算成功才进硬直。返回是否真实结算。</summary>
+    public bool OnHurt(DamageInfo info)
     {
-        if (Health.TryApplyDamage(info))
+        if (!Health.TryApplyDamage(info))
         {
-            Motor.ForceHurt(info);
+            return false;
         }
+        Motor.ForceHurt(info);
+        return true;
     }
 
     private void OnDied()
