@@ -57,8 +57,8 @@ public partial class Main : Node
     private void StartGame()
     {
         _mainMenu.Visible = false;
-        var levelScene = GD.Load<PackedScene>("res://Game/Scenes/TestLevel.tscn");
-        _level = levelScene.Instantiate();
+        var worldScene = GD.Load<PackedScene>("res://Game/Scenes/World.tscn");
+        _level = worldScene.Instantiate();
         _level.Name = "Level"; // 固定实例名，HUD 等按 LevelRoot/Level/Player 寻址
         _levelRoot.AddChild(_level);
         var player = _levelRoot.GetNode<Character>("Level/Player");
