@@ -1,8 +1,13 @@
-[gd_resource type="Resource" script_class="CharacterConfig" load_steps=6 format=3]
+[gd_resource type="Resource" format=3 uid="uid://3wx4so55da6n"]
 
-[ext_resource type="Script" path="res://Game/Gameplay/Characters/CharacterConfig.cs" id="1_cfg"]
-[ext_resource type="Script" path="res://Game/Gameplay/Characters/DashConfig.cs" id="2_dash"]
-[ext_resource type="Script" path="res://Game/Gameplay/Characters/AttackConfig.cs" id="3_atk"]
+[ext_resource type="Script" uid="uid://v8fncj7fxyg4" path="res://Game/Gameplay/Characters/CharacterConfig.cs" id="1_cfg"]
+[ext_resource type="Script" uid="uid://carqf38yujt70" path="res://Game/Gameplay/Characters/DashConfig.cs" id="2_dash"]
+[ext_resource type="Script" uid="uid://cr350ikyxoyll" path="res://Game/Gameplay/Characters/AttackConfig.cs" id="3_atk"]
+
+[sub_resource type="Resource" id="Resource_attack"]
+script = ExtResource("3_atk")
+KnockbackHorizontal = 360.0
+KnockbackVertical = 240.0
 
 [sub_resource type="Resource" id="Resource_dash"]
 script = ExtResource("2_dash")
@@ -10,13 +15,6 @@ Speed = 840.0
 Duration = 0.18
 Cooldown = 0.6
 EndSpeedKeepRatio = 0.4
-
-[sub_resource type="Resource" id="Resource_attack"]
-script = ExtResource("3_atk")
-Damage = 1
-KnockbackHorizontal = 360.0
-KnockbackVertical = 240.0
-Cooldown = 0.5
 
 [resource]
 script = ExtResource("1_cfg")
@@ -29,7 +27,6 @@ JumpCutMultiplier = 0.45
 CoyoteTime = 0.1
 JumpBufferTime = 0.12
 MaxFallSpeed = 1040.0
-MaxHP = 5
 InvincibilityTime = 0.8
 HurtStunTime = 0.3
 Dash = SubResource("Resource_dash")

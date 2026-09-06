@@ -1,17 +1,18 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://cron8cg1dtss0"]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/BaseCharacter.tscn" id="1_base"]
-[ext_resource type="Script" path="res://Game/Gameplay/Characters/InputSources/PlayerInputSource.cs" id="2_input"]
-[ext_resource type="Resource" path="res://Game/Config/player_config.tres" id="3_cfg"]
+[ext_resource type="Script" uid="uid://c5vokbij011wl" path="res://Game/Gameplay/Characters/InputSources/PlayerInputSource.cs" id="2_input"]
+[ext_resource type="Resource" uid="uid://3wx4so55da6n" path="res://Game/Config/player_config.tres" id="3_cfg"]
 [ext_resource type="SpriteFrames" path="res://Game/Art/Placeholders/player_frames.tres" id="4_frames"]
 
-[node name="Player" instance=ExtResource("1_base")]
+[node name="Player" unique_id=1613628459 instance=ExtResource("1_base")]
 _config = ExtResource("3_cfg")
 
 [node name="Sprite" parent="Pivot" index="0"]
 sprite_frames = ExtResource("4_frames")
+animation = &"idle"
 
-[node name="Camera" type="Camera2D" parent="."]
+[node name="Camera" type="Camera2D" parent="." index="4" unique_id=1926116850]
 limit_left = 0
 limit_top = 0
 limit_right = 1280
@@ -19,5 +20,5 @@ limit_bottom = 720
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="Input" type="Node" parent="."]
+[node name="Input" type="Node" parent="." index="5" unique_id=1735073345]
 script = ExtResource("2_input")
