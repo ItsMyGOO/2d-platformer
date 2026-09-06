@@ -64,6 +64,12 @@ public partial class Character : CharacterBody2D
                 _config.Attack.KnockbackHorizontal,
                 _config.Attack.KnockbackVertical
             );
+            this.FindDescendant<ContactDamager>()
+                ?.Configure(
+                    _config.Attack.Damage,
+                    _config.Attack.KnockbackHorizontal,
+                    _config.Attack.KnockbackVertical
+                );
         }
         _presenter?.Bind(Motor, Health);
         _screenShake = this.FindDescendant<ScreenShake>();
