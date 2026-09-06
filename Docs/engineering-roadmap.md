@@ -65,13 +65,13 @@ PhantomCamera2D 的阻尼语义与 Camera2D `position_smoothing_speed` 不等价
 
 ## 4. 阶段任务与验收标准
 
-### 阶段⓪ 补提交缺失资源
+### 阶段⓪ 补提交缺失资源 ✅（2026-09-06 完成）
 
 **任务**：提交 git status 中全部未跟踪的游戏资源（战斗占位图、phantom_camera 资源/字体/图标）。
 
 **验收**：`git status` 干净；fresh clone 后 `dotnet build` 通过、headless 运行无缺贴图报错。
 
-### 阶段① 代码规范落地
+### 阶段① 代码规范落地 ✅（2026-09-06 完成）
 
 **任务**：
 
@@ -82,7 +82,7 @@ PhantomCamera2D 的阻尼语义与 Camera2D `position_smoothing_speed` 不等价
 
 **验收**：`dotnet csharpier . --check` 通过；code-standards.md 覆盖上述四项；游戏行为零变化。
 
-### 阶段② xUnit 测试基建（含配置双形态重构）
+### 阶段② xUnit 测试基建（含配置双形态重构）✅（2026-09-06 完成）
 
 **任务**：
 
@@ -98,7 +98,7 @@ PhantomCamera2D 的阻尼语义与 Camera2D `position_smoothing_speed` 不等价
 
 **验收**：`dotnet test` 全绿；探针重构前后输出一致；用例不依赖场景树与引擎单例；主项目编译零警告。
 
-### 阶段③ CI（GitHub Actions）
+### 阶段③ CI（GitHub Actions）✅（2026-09-06 完成）
 
 **任务**：`.github/workflows/ci.yml`，ubuntu + .NET 8，两个 job：
 
