@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Game/UI/Hud.cs" id="1_hud"]
+[ext_resource type="Texture2D" path="res://Game/Art/Placeholders/heart.png" id="2_heart"]
+
+[node name="Hud" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Box" type="HBoxContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 400.0
+offset_bottom = 48.0
+theme_override_constants/separation = 6
+
+[node name="Heart1" type="TextureRect" parent="Box"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_heart")
+
+[node name="Heart2" type="TextureRect" parent="Box"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_heart")
+
+[node name="Heart3" type="TextureRect" parent="Box"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_heart")
+
+[node name="Heart4" type="TextureRect" parent="Box"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_heart")
+
+[node name="Heart5" type="TextureRect" parent="Box"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_heart")

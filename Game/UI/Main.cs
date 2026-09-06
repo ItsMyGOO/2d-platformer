@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using GodotGameTemplate.Gameplay.Characters;
 
 namespace GodotGameTemplate.UI;
 
@@ -19,6 +20,7 @@ public partial class Main : Node
 
     private AppState _state = AppState.InMenu;
     private Node _level;
+    private Hud _hud;
 
     private MainMenu _mainMenu;
     private PauseMenu _pauseMenu;
@@ -59,12 +61,12 @@ public partial class Main : Node
         _level = levelScene.Instantiate();
         _level.Name = "Level"; // 固定实例名，HUD 等按 LevelRoot/Level/Player 寻址
         _levelRoot.AddChild(_level);
-        OnLevelStarted();
+        var player = _levelRoot.GetNode<Character>("Level/Player");
+        _hud = GD.Load<PackedScene>("res://Game/UI/Hud.tscn").Instantiate<Hud>();
+        GetNode("UiLayer").AddChild(_hud);
+        _hud.Bind(player.Health);
         _state = AppState.Playing;
     }
-
-    /// <summary>关卡就绪后的装配钩子（HUD 绑定等，子类/后续扩展点）。</summary>
-    protected virtual void OnLevelStarted() { }
 
     private void PauseGame()
     {
@@ -86,11 +88,12 @@ public partial class Main : Node
         _pauseMenu.Visible = false;
         _level?.QueueFree();
         _level = null;
-        OnLevelEnded();
+        if (_hud != null)
+        {
+            _hud.QueueFree();
+            _hud = null;
+        }
         _mainMenu.Visible = true;
         _state = AppState.InMenu;
     }
-
-    /// <summary>关卡卸载后的清理钩子。</summary>
-    protected virtual void OnLevelEnded() { }
 }
