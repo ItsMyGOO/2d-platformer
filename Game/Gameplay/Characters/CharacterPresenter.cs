@@ -1,4 +1,5 @@
 using System;
+using System;
 using Godot;
 using GodotGameTemplate.Gameplay.Characters.Combat;
 
@@ -25,6 +26,9 @@ public partial class CharacterPresenter : Node
     private Health _health;
     private Character _character;
     private CpuParticles2D _deathBurst;
+    private Hitbox _hitbox;
+    private bool _hitstopActive;
+    private Tween _punchTween;
 
     /// <summary>由编排者在逻辑层创建后调用，绑定引用并订阅运动事件。</summary>
     public void Bind(CharacterMotor motor, Health health)
@@ -33,6 +37,7 @@ public partial class CharacterPresenter : Node
         _dustParticles ??= GetParent().GetNodeOrNull<CpuParticles2D>("Dust");
         _pivot ??= GetParent().GetNodeOrNull<Node2D>("Pivot");
         _deathBurst ??= GetParent().GetNodeOrNull<CpuParticles2D>("DeathBurst");
+        _hitbox ??= GetParent().FindDescendant<Hitbox>();
         Unbind();
         _motor = motor;
         _health = health;
@@ -43,6 +48,11 @@ public partial class CharacterPresenter : Node
         {
             _character.Died += OnCharacterDied;
         }
+        if (_hitbox != null)
+        {
+            _hitbox.HitConfirmed += OnHitConfirmed;
+        }
+        _health.Damaged += OnHealthDamaged;
     }
 
     private void Unbind()
@@ -57,6 +67,11 @@ public partial class CharacterPresenter : Node
         {
             _character.Died -= OnCharacterDied;
         }
+        if (_hitbox != null)
+        {
+            _hitbox.HitConfirmed -= OnHitConfirmed;
+        }
+        _health.Damaged -= OnHealthDamaged;
         _motor = null;
         _health = null;
         _character = null;
@@ -64,6 +79,40 @@ public partial class CharacterPresenter : Node
 
     /// <summary>死亡瞬间播放粒子爆发（尸体动画照常播放，由死亡调度控制消失时机）。</summary>
     private void OnCharacterDied() => _deathBurst?.Restart();
+
+    /// <summary>命中顿帧：任何真实命中的瞬间全局极短减速，强化打击感。</summary>
+    private void OnHitConfirmed()
+    {
+        if (_hitstopActive)
+        {
+            return;
+        }
+        _hitstopActive = true;
+        Engine.TimeScale = 0.05f;
+        var timer = GetTree()
+            .CreateTimer(0.06, processAlways: true, processInPhysics: false, ignoreTimeScale: true);
+        timer.Timeout += () =>
+        {
+            Engine.TimeScale = 1f;
+            _hitstopActive = false;
+        };
+    }
+
+    /// <summary>受击反馈：精灵横向拉伸纵向压扁后弹回（朝向翻转在 Pivot 上，不受影响）。</summary>
+    private void OnHealthDamaged(DamageInfo info)
+    {
+        if (_sprite == null)
+        {
+            return;
+        }
+        _punchTween?.Kill();
+        _sprite.Scale = new Vector2(1.25f, 0.8f);
+        _punchTween = CreateTween();
+        _punchTween
+            .TweenProperty(_sprite, "scale", Vector2.One, 0.14f)
+            .SetTrans(Tween.TransitionType.Back)
+            .SetEase(Tween.EaseType.Out);
+    }
 
     public override void _ExitTree() => Unbind();
 
