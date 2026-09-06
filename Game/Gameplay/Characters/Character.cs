@@ -45,7 +45,7 @@ public partial class Character : CharacterBody2D
         Health = new Health(_config.MaxHP, _config.InvincibilityTime);
         Health.Died += OnDied;
 
-        Motor = new CharacterMotor(_config);
+        Motor = new CharacterMotor(_config.ToData());
         Motor.AttackStarted += () => _hitbox?.BeginSwing();
         Motor.AttackActiveChanged += active => _hitbox?.SetActive(active);
         _presenter?.Bind(Motor, Health);

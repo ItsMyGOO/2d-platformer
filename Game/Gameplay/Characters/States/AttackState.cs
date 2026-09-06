@@ -36,7 +36,7 @@ public class AttackState : CharacterState
 
     public override void Process(in InputIntent intent, float delta, float gravity)
     {
-        AttackConfig attack = Motor.Config.Attack;
+        var attack = Motor.Config.Attack;
         _elapsed += delta;
 
         if (!_activeOpened && _elapsed >= attack.WindupTime)

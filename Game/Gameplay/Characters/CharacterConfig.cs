@@ -63,4 +63,45 @@ public partial class CharacterConfig : Resource
     /// <summary>攻击能力配置；null 表示不具备攻击。</summary>
     [Export]
     public AttackConfig Attack { get; set; }
+
+    /// <summary>映射为逻辑层运行态配置（见 <see cref="CharacterConfigData"/>）。</summary>
+    public CharacterConfigData ToData() =>
+        new()
+        {
+            MaxSpeed = MaxSpeed,
+            Acceleration = Acceleration,
+            Friction = Friction,
+            JumpVelocity = JumpVelocity,
+            GravityScale = GravityScale,
+            JumpCutMultiplier = JumpCutMultiplier,
+            CoyoteTime = CoyoteTime,
+            JumpBufferTime = JumpBufferTime,
+            MaxFallSpeed = MaxFallSpeed,
+            MaxHP = MaxHP,
+            InvincibilityTime = InvincibilityTime,
+            HurtStunTime = HurtStunTime,
+            Dash =
+                Dash == null
+                    ? null
+                    : new CharacterConfigData.DashData
+                    {
+                        Speed = Dash.Speed,
+                        Duration = Dash.Duration,
+                        Cooldown = Dash.Cooldown,
+                        EndSpeedKeepRatio = Dash.EndSpeedKeepRatio,
+                    },
+            Attack =
+                Attack == null
+                    ? null
+                    : new CharacterConfigData.AttackData
+                    {
+                        WindupTime = Attack.WindupTime,
+                        ActiveTime = Attack.ActiveTime,
+                        RecoveryTime = Attack.RecoveryTime,
+                        Damage = Attack.Damage,
+                        KnockbackHorizontal = Attack.KnockbackHorizontal,
+                        KnockbackVertical = Attack.KnockbackVertical,
+                        Cooldown = Attack.Cooldown,
+                    },
+        };
 }

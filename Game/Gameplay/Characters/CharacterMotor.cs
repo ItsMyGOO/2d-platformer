@@ -14,7 +14,7 @@ public class CharacterMotor
 {
     private const float TimerExpired = 999f;
 
-    private readonly CharacterConfig _config;
+    private readonly CharacterConfigData _config;
     private readonly GroundedState _groundedState;
     private readonly AirborneState _airborneState;
     private readonly DashState _dashState;
@@ -31,7 +31,7 @@ public class CharacterMotor
     /// <summary>攻击判定窗口开/关。逻辑层不碰节点，由编排者订阅驱动 Hitbox。</summary>
     public event Action<bool> AttackActiveChanged;
 
-    public CharacterConfig Config => _config;
+    public CharacterConfigData Config => _config;
 
     public Vector2 Velocity { get; internal set; }
 
@@ -57,7 +57,7 @@ public class CharacterMotor
     private float _dashCooldownTimer;
     private float _attackCooldownTimer;
 
-    public CharacterMotor(CharacterConfig config)
+    public CharacterMotor(CharacterConfigData config)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _groundedState = new GroundedState(this);

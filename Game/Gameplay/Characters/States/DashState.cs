@@ -17,7 +17,7 @@ public class DashState : CharacterState
 
     public override void Enter()
     {
-        DashConfig dash = Motor.Config.Dash;
+        var dash = Motor.Config.Dash;
         float axis = Motor.LastIntent.MoveAxis;
         _direction = axis != 0f ? MathF.Sign(axis) : Motor.Facing; // 可反身冲刺
         Motor.SetFacing((int)_direction);
