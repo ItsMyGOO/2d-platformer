@@ -32,11 +32,12 @@ Player (CharacterBody2D, 继承 BaseCharacter.tscn)
 ## 3. 震屏事件接线
 
 `ScreenShake.cs`（表现层，沿用 `CharacterPresenter` 的 Bind/Unbind 装配模式）订阅逻辑层事件，
-转发给同场景的噪声发射器（GDScript `emit()` 一次触发）：
+转发给同场景的噪声发射器（GDScript `emit()` 一次触发）。
+攻击抖动用**命中确认**（`Hitbox.HitConfirmed`）而非出招（`Motor.AttackStarted`）触发——挥空不震屏：
 
 | 事件源 | 发射器 | 噪声资源 | amplitude / frequency | duration / decay |
 |---|---|---|---|---|
-| `Motor.AttackStarted`（出招） | AttackNoiseEmitter2D | `Game/Config/shake_attack.tres` | 30 / 1.5 | 0.2s / 0.1s |
+| `Hitbox.HitConfirmed`（攻击命中结算） | AttackNoiseEmitter2D | `Game/Config/shake_attack.tres` | 30 / 1.5 | 0.2s / 0.1s |
 | `Health.Damaged`（受击） | HurtNoiseEmitter2D | `Game/Config/shake_hurt.tres` | 50 / 1.0 | 0.3s / 0.15s |
 | `Motor.Landed`（落地） | LandNoiseEmitter2D | `Game/Config/shake_land.tres` | 15 / 2.0 | 0.12s / 0.08s |
 

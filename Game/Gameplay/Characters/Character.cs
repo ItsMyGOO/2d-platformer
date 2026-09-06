@@ -52,7 +52,7 @@ public partial class Character : CharacterBody2D
         Motor.AttackActiveChanged += active => _hitbox?.SetActive(active);
         _presenter?.Bind(Motor, Health);
         _screenShake = this.FindDescendant<ScreenShake>();
-        _screenShake?.Bind(Motor, Health);
+        _screenShake?.Bind(Motor, Health, _hitbox);
 
         _spawnPosition = GlobalPosition;
     }

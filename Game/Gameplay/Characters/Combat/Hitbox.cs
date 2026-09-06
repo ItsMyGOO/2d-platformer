@@ -22,6 +22,9 @@ public partial class Hitbox : Area2D
     private readonly HashSet<Hurtbox> _hitThisSwing = new();
     private ColorRect _debugVisual;
 
+    /// <summary>命中确认：每次实际结算伤害后触发一次（表现层用作命中反馈）。</summary>
+    public event Action HitConfirmed;
+
     public override void _Ready()
     {
         Monitoring = false;
@@ -64,6 +67,7 @@ public partial class Hitbox : Area2D
                 hurtbox.ReceiveHit(
                     DamageInfo.Create(_damage, _knockbackHorizontal, _knockbackVertical, direction)
                 );
+                HitConfirmed?.Invoke();
             }
         }
     }
