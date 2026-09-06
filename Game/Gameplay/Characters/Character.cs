@@ -21,6 +21,8 @@ public partial class Character : CharacterBody2D
     [Export]
     private CharacterPresenter _presenter;
 
+    private ScreenShake _screenShake;
+
     public CharacterMotor Motor { get; private set; }
 
     public Health Health { get; private set; }
@@ -49,6 +51,8 @@ public partial class Character : CharacterBody2D
         Motor.AttackStarted += () => _hitbox?.BeginSwing();
         Motor.AttackActiveChanged += active => _hitbox?.SetActive(active);
         _presenter?.Bind(Motor, Health);
+        _screenShake = this.FindDescendant<ScreenShake>();
+        _screenShake?.Bind(Motor, Health);
 
         _spawnPosition = GlobalPosition;
     }
