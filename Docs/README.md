@@ -8,4 +8,5 @@
 | [camera-design.md](camera-design.md) | 相机与震屏：Phantom Camera 接线、旧 Camera2D 参数映射、震屏调参 |
 | [code-standards.md](code-standards.md) | 代码规范：命名、XML doc、装配约定、CSharpier 与提交规则 |
 | [engineering-roadmap.md](engineering-roadmap.md) | 工程质量路线图：六阶段任务/验收与勾记、下一期候选、环境备忘 |
+| [backlog.md](backlog.md) | 备忘：挂账清单 + 功能 Backlog（「还没做的事」的单一事实源） |
 | [plans/](plans/) | 各阶段实施计划（历史记录：目标、步骤、裁量点） |
