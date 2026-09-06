@@ -79,4 +79,16 @@ public class Health
         _invincibilityTimer = _invincibilityTime;
         HealthChanged?.Invoke(CurrentHP);
     }
+
+    /// <summary>治疗：已死亡、已满血或治疗量非正时拒绝并返回 false。治疗量超过上限时截断。</summary>
+    public bool Heal(int amount)
+    {
+        if (IsDead || CurrentHP >= MaxHP || amount <= 0)
+        {
+            return false;
+        }
+        CurrentHP = Math.Min(MaxHP, CurrentHP + amount);
+        HealthChanged?.Invoke(CurrentHP);
+        return true;
+    }
 }

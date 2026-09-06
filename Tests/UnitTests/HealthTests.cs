@@ -137,4 +137,53 @@ public class HealthTests
 
         Assert.Equal(5, lastHp);
     }
+
+    [Fact]
+    public void Heal_RestoresUpToAmount_AndFiresHealthChanged()
+    {
+        var health = new Health(maxHP: 5, invincibilityTime: 0.8f);
+        health.TryApplyDamage(Hit(damage: 3));
+        int lastHp = 0;
+        health.HealthChanged += hp => lastHp = hp;
+
+        bool healed = health.Heal(2);
+
+        Assert.True(healed);
+        Assert.Equal(4, health.CurrentHP);
+        Assert.Equal(4, lastHp);
+    }
+
+    [Fact]
+    public void Heal_AtFullHp_IsRejected()
+    {
+        var health = new Health(maxHP: 5, invincibilityTime: 0.8f);
+
+        bool healed = health.Heal(1);
+
+        Assert.False(healed);
+        Assert.Equal(5, health.CurrentHP);
+    }
+
+    [Fact]
+    public void Heal_CapsAtMaxHp()
+    {
+        var health = new Health(maxHP: 5, invincibilityTime: 0.8f);
+        health.TryApplyDamage(Hit(damage: 1));
+
+        health.Heal(99);
+
+        Assert.Equal(5, health.CurrentHP);
+    }
+
+    [Fact]
+    public void Heal_WhenDead_IsRejected()
+    {
+        var health = new Health(maxHP: 1, invincibilityTime: 0.8f);
+        health.TryApplyDamage(Hit(damage: 1));
+
+        bool healed = health.Heal(1);
+
+        Assert.False(healed);
+        Assert.True(health.IsDead);
+    }
 }

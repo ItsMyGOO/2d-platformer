@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/Slime.tscn" id="2_slime"]
 [ext_resource type="Script" path="res://Game/Gameplay/World/KillZone.cs" id="3_kill"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/HeartPickup.tscn" id="4_pickup"]
 
 [sub_resource type="RectangleShape2D" id="ground_a"]
 size = Vector2(512, 64)
@@ -179,3 +180,6 @@ position = Vector2(680, 642)
 
 [node name="Slime2" parent="." instance=ExtResource("2_slime")]
 position = Vector2(860, 642)
+
+[node name="HeartPickup" parent="." instance=ExtResource("4_pickup")]
+position = Vector2(304, 542)
