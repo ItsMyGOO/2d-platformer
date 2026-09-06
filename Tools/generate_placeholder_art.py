@@ -1,4 +1,7 @@
-"""Generate placeholder pixel-art PNGs for characters (no PIL, raw PNG via zlib)."""
+"""Generate placeholder pixel-art PNGs for characters (no PIL, raw PNG via zlib).
+Sprites are authored as 16x16 ASCII grids and emitted at 32x32 (dust 8x8)
+via nearest-neighbour doubling, keeping the old composition exactly.
+"""
 import os
 import struct
 import zlib
@@ -353,6 +356,12 @@ DUST = [
 ]
 
 
+def scale2x(rows):
+    """最近邻 ×2：每像素横向复制一次、每行纵向复制一次。"""
+    doubled = ["".join(ch * 2 for ch in row) for row in rows]
+    return [row for row in doubled for _ in range(2)]
+
+
 def write_png(path, rows):
     height = len(rows)
     width = len(rows[0])
@@ -400,7 +409,7 @@ def main():
         "dust.png": DUST,
     }
     for name, rows in images.items():
-        write_png(os.path.join(OUT, name), rows)
+        write_png(os.path.join(OUT, name), scale2x(rows))
     print(f"wrote {len(images)} PNGs to {OUT}")
 
 
