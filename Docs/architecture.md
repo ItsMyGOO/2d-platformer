@@ -26,14 +26,15 @@ Game/
 │   ├── Combat/                  # 战斗子系统：DamageInfo / Health / Hitbox / Hurtbox
 │   ├── InputSources/            # 输入层：InputSource 抽象 + Player / SlimeAI 两实现
 │   └── States/                  # 类式状态机：CharacterState 基类 + 6 个行为状态
-├── Gameplay/World/          # 关卡类玩法物件（KillZone 即死区）
-└── Scenes/                  # Main（应用编排）+ BaseCharacter（基座）+ Player / Slime（继承）+ TestLevel
+├── Gameplay/World/          # 关卡类玩法物件（World 九宫格房间流式 / KillZone 即死区）
+└── Scenes/                  # Main（应用编排）+ World（三房间无缝世界）+ BaseCharacter 基座
+│                              + Player / Slime（继承）+ TestLevel / RoomB / RoomC（房间）
 Game/UI/                     # UI 层（命名空间 GodotGameTemplate.UI）：Main 编排 + 主菜单/暂停/HUD
 Tools/
 ├── generate_placeholder_art.py  # 占位图生成（16×16 ASCII 网格 → 最近邻 ×2 输出 32×32）
 └── headless_probe/              # 回归探针：脚本化输入 + 8 项 PASS/FAIL（见 §7）
 Tests/UnitTests/                 # xUnit 纯单元测试（25 个）
-Docs/                            # 项目文档（索引见 §10）
+Docs/                            # 项目文档（索引见 §11）
 addons/phantom_camera/           # Phantom Camera 插件（相机跟随与震屏，见 Docs/camera-design.md）
 ```
 
@@ -104,14 +105,19 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
   `KillInstantly`）；两者汇入同一条死亡调度（死亡动画 → 敌人 1s 消失 / 玩家回出生点重生）。
 - 死亡差异：敌人 `QueueFree` 消失；玩家回出生点、回满 HP、`Motor.Reset()`。
   玩家身份由输入源类型推导（`_inputSource is PlayerInputSource`），无标记字段。
-- **物理层**（project.godot 命名）：
+- **物理层**（project.godot 命名，第三期规范化——身体只撞 terrain，**单位之间全穿透**，
+  伤害完全由判定框/接触组件结算）：
 
-| 层 | 名称 | 用途 |
-|---|---|---|
-| 1 | player_body | 玩家实体（与地形/敌人实体碰撞） |
-| 2 | enemy_body | 敌人实体 |
-| 3 | player_hurtbox | 玩家受击盒（敌人 Hitbox 的 mask） |
-| 4 | enemy_hurtbox | 敌人受击盒（玩家 Hitbox 的 mask） |
+| 层号 | 位值 | 名称 | 用途 |
+|---|---|---|---|
+| 1 | 1 | terrain | 世界地形（唯一与身体碰撞的层） |
+| 2 | 2 | enemy_body | 敌人实体 |
+| 3 | 4 | player_hurtbox | 玩家受击盒（敌人 Hitbox/ContactDamager 的 mask） |
+| 4 | 8 | enemy_hurtbox | 敌人受击盒（玩家 Hitbox 的 mask） |
+| 5 | 16 | player_body | 玩家实体（ChaseDetector/KillZone 的 mask） |
+
+- **接触伤害**：敌人身上常驻 `ContactDamager`（Area2D，与身体同尺寸），每帧轮询重叠并结算——
+  `Health` 无敌帧天然限频（0.8s/次）；数值与挥击同源（AttackConfig 经 Configure 下发）。
 
 ## 5. 表现层与 UI
 
@@ -211,9 +217,27 @@ Main (Node, process_mode=Always)          ← Esc 处理、生命周期切换
 - Esc：游玩中 `get_tree().Paused = true` + 暂停菜单；暂停中 Esc 或「继续」恢复。
 - 回主菜单：Unpause → 释放关卡与 HUD → 显示主菜单。
 - 玩家死亡 → 现有自动重生（回出生点、回满血、相机瞬移）即「死亡→重开」闭环。
-- 探针（`Tools/headless_probe`）直接实例化 TestLevel，不经过 Main——UI 改动不影响探针。
+- 探针（`Tools/headless_probe`）直接实例化 World，不经过 Main——UI 改动不影响探针。
 
-## 11. 文档索引
+## 11. 世界与房间流式
+
+世界 = 1280×720 **房间网格**（`Game/Scenes/World.tscn`：`World` 根 + `Rooms/` 下按网格坐标
+摆放的房间实例 + 世界级持久 Player）。`World`（`Gameplay/World/World.cs`）每帧检查玩家所在格：
+
+- 玩家所在格 ±1（**3×3 窗口**）的房间在场景树，其余 `CallDeferred` **RemoveChild 缓存**——
+  节点不销毁，击杀/位置状态天然保留，走回窗口即原样恢复；
+- **门 = 相邻房间墙体的几何开口**（贴地面高 160px），无传送脚本；边界墙体由左侧房间承担，
+  右侧房间不建左墙（窗口数学保证边界两侧房间同时在场）；
+- 跨格时把玩家重生点更新为当前房间的 `Spawn` 标记（死亡 → 回当前房间出生点 + 相机瞬移）；
+- 相机边界是**世界级**导出（`LimitLeft/Top/Right/Bottom`），由 CameraRig 装配时应用到 PCam
+  ——房间不持有相机数据；
+- `World._ExitTree` 显式释放缓存中的房间（不在树上的节点不随场景树销毁）。
+
+**新增一个房间的 checklist**：复制现有房间场景 → 几何按本地坐标 0–1280 制作
+（边界开口位置/地面高度与邻房对齐）→ 在 `World.tscn` 的 `Rooms/` 下实例化并摆到网格坐标
+→ 放 `Spawn` 标记 → 探针回归。
+
+## 12. 文档索引
 
 | 文档 | 定位 |
 |---|---|

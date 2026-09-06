@@ -59,8 +59,8 @@ Player (CharacterBody2D, 继承 BaseCharacter.tscn)
 
 ## 5. 边界与限制用法
 
-- pcam 的 `limit_left/top/right/bottom` 为整数像素，必须与关卡几何对齐；
-  当前关卡 ×2 后可活动区域为 (0,0)-(1280,720)，与视口一致，相机实际不滚动。
-- 换正式关卡时：随关卡尺寸设置四值（衔接下一期「关卡加载与场景切换」候选——
-  相机边界应随关卡数据走，而不是硬编码在场景里；届时多 PCam + priority 可做区域运镜）。
+- 相机边界是**世界级数据**：由 `World`（`Gameplay/World/World.cs`）导出
+  `LimitLeft/Top/Right/Bottom`，`CameraRig` 装配时沿祖先链找到 World 并应用到 PCam——
+  Player 场景不持有任何相机边界（房间流式下世界可宽于视口，相机随玩家卷轴）。
+- 换世界时：随世界尺寸设置四值（无缝房间流式见 architecture.md §11）。
 - 调试建议：编辑器里选中 pcam 可开 `draw_limits` 可视化边界框。
