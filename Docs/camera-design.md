@@ -43,7 +43,9 @@ Player (CharacterBody2D, 继承 BaseCharacter.tscn)
 - **可调**：抖动幅度/频率在 `Game/Config/shake_*.tres`（amplitude 为像素，×2 世界尺度下
   默认值 10 偏小）；时长/衰减在 Player.tscn 发射器节点属性。
 - **可关**：Player.tscn 里 `ScreenShake` 节点的 `Enabled` 总开关；关闭后事件仍订阅但不触发。
-- 噪声层匹配：发射器 `noise_emitter_layer` 与 pcam `host_layers` 默认同为 1，新增发射器无需改层。
+- 噪声层匹配：发射器 `noise_emitter_layer` 默认 1，但 **PCam 的 `noise_emitter_layer` 默认为 0
+  （不接收任何发射器）**，必须在 PCam 上显式设为 1（当前 PlayerPhantomCamera2D 已设置）。
+  新增发射器或 PCam 时两侧至少要有一层对应，否则噪声被静默丢弃。
 - amplitude/frequency/duration 当前值为手感初值（阶段⑤实机标定），后续可继续微调。
 
 ## 4. 边界与限制用法
