@@ -20,6 +20,10 @@ run/main_scene="res://Game/Scenes/TestLevel.tscn"
 config/features=PackedStringArray("4.6", "C#")
 config/icon="res://icon.svg"
 
+[autoload]
+
+PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
+
 [display]
 
 window/size/viewport_width=1280
@@ -32,6 +36,10 @@ window/stretch/aspect="keep"
 [dotnet]
 
 project/assembly_name="GodotGameTemplate"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/phantom_camera/plugin.cfg")
 
 [input]
 
