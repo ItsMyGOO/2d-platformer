@@ -12,6 +12,12 @@ size = Vector2(96, 32)
 [sub_resource type="RectangleShape2D" id="wall"]
 size = Vector2(32, 1600)
 
+[sub_resource type="RectangleShape2D" id="wall_door_top"]
+size = Vector2(32, 496)
+
+[sub_resource type="RectangleShape2D" id="wall_door_bottom"]
+size = Vector2(32, 944)
+
 [sub_resource type="RectangleShape2D" id="killzone"]
 size = Vector2(1600, 64)
 
@@ -66,7 +72,26 @@ color = Color(0.65, 0.56, 0.46, 1)
 position = Vector2(1296, 360)
 
 [node name="Shape" type="CollisionShape2D" parent="WallRight"]
-shape = SubResource("wall")
+position = Vector2(0, -112)
+shape = SubResource("wall_door_top")
+
+[node name="Shape2" type="CollisionShape2D" parent="WallRight"]
+position = Vector2(0, 768)
+shape = SubResource("wall_door_bottom")
+
+[node name="FillTop" type="ColorRect" parent="WallRight"]
+offset_left = -16.0
+offset_top = -360.0
+offset_right = 16.0
+offset_bottom = 136.0
+color = Color(0.33, 0.31, 0.36, 1)
+
+[node name="FillBottom" type="ColorRect" parent="WallRight"]
+offset_left = -16.0
+offset_top = 296.0
+offset_right = 16.0
+offset_bottom = 1240.0
+color = Color(0.33, 0.31, 0.36, 1)
 
 [node name="KillZone" type="Area2D" parent="."]
 position = Vector2(640, 960)

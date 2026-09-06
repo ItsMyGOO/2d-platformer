@@ -68,6 +68,13 @@ position = Vector2(1296, 360)
 [node name="Shape" type="CollisionShape2D" parent="WallRight"]
 shape = SubResource("wall")
 
+[node name="Fill" type="ColorRect" parent="WallRight"]
+offset_left = -16.0
+offset_top = -800.0
+offset_right = 16.0
+offset_bottom = 800.0
+color = Color(0.33, 0.31, 0.36, 1)
+
 [node name="KillZone" type="Area2D" parent="."]
 position = Vector2(640, 960)
 collision_layer = 0

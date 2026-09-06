@@ -123,6 +123,13 @@ position = Vector2(-16, 360)
 [node name="Shape" type="CollisionShape2D" parent="WallLeft"]
 shape = SubResource("wall")
 
+[node name="Fill" type="ColorRect" parent="WallLeft"]
+offset_left = -16.0
+offset_top = -800.0
+offset_right = 16.0
+offset_bottom = 800.0
+color = Color(0.33, 0.31, 0.36, 1)
+
 [node name="WallRight" type="StaticBody2D" parent="."]
 position = Vector2(1296, 360)
 
@@ -133,6 +140,20 @@ shape = SubResource("wall_door_top")
 [node name="Shape2" type="CollisionShape2D" parent="WallRight"]
 position = Vector2(0, 768)
 shape = SubResource("wall_door_bottom")
+
+[node name="FillTop" type="ColorRect" parent="WallRight"]
+offset_left = -16.0
+offset_top = -360.0
+offset_right = 16.0
+offset_bottom = 136.0
+color = Color(0.33, 0.31, 0.36, 1)
+
+[node name="FillBottom" type="ColorRect" parent="WallRight"]
+offset_left = -16.0
+offset_top = 296.0
+offset_right = 16.0
+offset_bottom = 1240.0
+color = Color(0.33, 0.31, 0.36, 1)
 
 [node name="Spawn" type="Marker2D" parent="."]
 position = Vector2(128, 642)
