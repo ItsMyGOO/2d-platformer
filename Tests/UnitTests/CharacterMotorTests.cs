@@ -386,7 +386,7 @@ public class CharacterMotorTests
         motor.Kill();
 
         Assert.Equal(CharacterVisualState.Dead, motor.VisualState);
-        Assert.Equal(-140f, motor.Velocity.Y); // 死亡小跳
+        Assert.Equal(-280f, motor.Velocity.Y); // 死亡小跳（随世界 ×2）
 
         motor.Kill();
         motor.ForceHurt(

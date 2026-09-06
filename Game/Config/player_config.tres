@@ -6,7 +6,7 @@
 
 [sub_resource type="Resource" id="Resource_dash"]
 script = ExtResource("2_dash")
-Speed = 420.0
+Speed = 840.0
 Duration = 0.18
 Cooldown = 0.6
 EndSpeedKeepRatio = 0.4
@@ -14,21 +14,21 @@ EndSpeedKeepRatio = 0.4
 [sub_resource type="Resource" id="Resource_attack"]
 script = ExtResource("3_atk")
 Damage = 1
-KnockbackHorizontal = 180.0
-KnockbackVertical = 120.0
+KnockbackHorizontal = 360.0
+KnockbackVertical = 240.0
 Cooldown = 0.5
 
 [resource]
 script = ExtResource("1_cfg")
-MaxSpeed = 130.0
-Acceleration = 1000.0
-Friction = 1400.0
-JumpVelocity = -330.0
-GravityScale = 1.0
+MaxSpeed = 260.0
+Acceleration = 2000.0
+Friction = 2800.0
+JumpVelocity = -660.0
+GravityScale = 2.0
 JumpCutMultiplier = 0.45
 CoyoteTime = 0.1
 JumpBufferTime = 0.12
-MaxFallSpeed = 520.0
+MaxFallSpeed = 1040.0
 MaxHP = 5
 InvincibilityTime = 0.8
 HurtStunTime = 0.3

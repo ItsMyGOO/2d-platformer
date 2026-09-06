@@ -6,21 +6,21 @@
 [sub_resource type="Resource" id="Resource_attack"]
 script = ExtResource("2_atk")
 Damage = 1
-KnockbackHorizontal = 140.0
-KnockbackVertical = 100.0
+KnockbackHorizontal = 280.0
+KnockbackVertical = 200.0
 Cooldown = 0.8
 
 [resource]
 script = ExtResource("1_cfg")
-MaxSpeed = 60.0
-Acceleration = 500.0
-Friction = 700.0
-JumpVelocity = -280.0
-GravityScale = 1.0
+MaxSpeed = 120.0
+Acceleration = 1000.0
+Friction = 1400.0
+JumpVelocity = -560.0
+GravityScale = 2.0
 JumpCutMultiplier = 0.5
 CoyoteTime = 0.05
 JumpBufferTime = 0.05
-MaxFallSpeed = 480.0
+MaxFallSpeed = 960.0
 MaxHP = 2
 InvincibilityTime = 0.4
 HurtStunTime = 0.25

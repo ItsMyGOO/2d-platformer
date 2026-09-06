@@ -209,7 +209,7 @@ public class CharacterMotor
         {
             return;
         }
-        Velocity = new Vector2(0f, -140f); // 死亡小跳
+        Velocity = new Vector2(0f, -280f); // 死亡小跳（随世界 ×2）
         ChangeState(_deadState);
     }
 
