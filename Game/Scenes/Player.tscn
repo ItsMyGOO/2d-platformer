@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://Game/Scenes/BaseCharacter.tscn" id="1_base"]
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/InputSources/PlayerInputSource.cs" id="2_input"]
+[ext_resource type="Resource" path="res://Game/Config/player_config.tres" id="3_cfg"]
+[ext_resource type="SpriteFrames" path="res://Game/Art/Placeholders/player_frames.tres" id="4_frames"]
+
+[node name="Player" instance=ExtResource("1_base")]
+_config = ExtResource("3_cfg")
+
+[node name="Sprite" parent="." index="1"]
+sprite_frames = ExtResource("4_frames")
+
+[node name="Camera" type="Camera2D" parent="."]
+limit_left = 0
+limit_top = 0
+limit_right = 640
+limit_bottom = 360
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="Input" type="Node" parent="."]
+script = ExtResource("2_input")

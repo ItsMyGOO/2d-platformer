@@ -1,0 +1,23 @@
+using Godot;
+
+namespace GodotGameTemplate.Gameplay.Characters.InputSources;
+
+/// <summary>玩家输入：读取 InputMap 中定义的动作，翻译为意图。</summary>
+public partial class PlayerInputSource : InputSource
+{
+    [Export]
+    private string _moveLeftAction = "move_left";
+
+    [Export]
+    private string _moveRightAction = "move_right";
+
+    [Export]
+    private string _jumpAction = "jump";
+
+    public override InputIntent Poll(float delta) =>
+        InputIntent.Create(
+            Input.GetAxis(_moveLeftAction, _moveRightAction),
+            Input.IsActionJustPressed(_jumpAction),
+            Input.IsActionPressed(_jumpAction)
+        );
+}

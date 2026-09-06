@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CharacterConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/CharacterConfig.cs" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+MaxSpeed = 60.0
+Acceleration = 500.0
+Friction = 700.0
+JumpVelocity = -280.0
+GravityScale = 1.0
+JumpCutMultiplier = 0.5
+CoyoteTime = 0.05
+JumpBufferTime = 0.05
+MaxFallSpeed = 480.0

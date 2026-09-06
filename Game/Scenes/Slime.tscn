@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://Game/Scenes/BaseCharacter.tscn" id="1_base"]
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/InputSources/SlimeAIInputSource.cs" id="2_ai"]
+[ext_resource type="Resource" path="res://Game/Config/slime_config.tres" id="3_cfg"]
+[ext_resource type="SpriteFrames" path="res://Game/Art/Placeholders/slime_frames.tres" id="4_frames"]
+
+[node name="Slime" instance=ExtResource("1_base")]
+collision_layer = 2
+collision_mask = 1
+_config = ExtResource("3_cfg")
+
+[node name="Sprite" parent="." index="1"]
+sprite_frames = ExtResource("4_frames")
+
+[node name="WallRay" type="RayCast2D" parent="."]
+position = Vector2(0, -1)
+target_position = Vector2(14, 0)
+
+[node name="LedgeNearRay" type="RayCast2D" parent="."]
+position = Vector2(6, 6)
+target_position = Vector2(8, 10)
+
+[node name="LedgeFarRay" type="RayCast2D" parent="."]
+position = Vector2(2, 6)
+target_position = Vector2(30, 10)
+
+[node name="AIInput" type="Node" parent="."]
+script = ExtResource("2_ai")

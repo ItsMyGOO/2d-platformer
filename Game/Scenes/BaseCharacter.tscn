@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/Character.cs" id="1_char"]
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/CharacterPresenter.cs" id="2_pres"]
+[ext_resource type="Texture2D" path="res://Game/Art/Placeholders/dust.png" id="3_dust"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(12, 14)
+
+[node name="Character" type="CharacterBody2D"]
+script = ExtResource("1_char")
+
+[node name="Shape" type="CollisionShape2D" parent="." index="0"]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." index="1"]
+position = Vector2(0, -1)
+
+[node name="Dust" type="CPUParticles2D" parent="." index="2"]
+position = Vector2(0, 7)
+emitting = false
+amount = 10
+lifetime = 0.35
+one_shot = true
+explosiveness = 1.0
+texture = ExtResource("3_dust")
+direction = Vector2(0, -1)
+spread = 80.0
+gravity = Vector2(0, 600)
+initial_velocity_min = 30.0
+initial_velocity_max = 80.0
+scale_amount_min = 0.5
+scale_amount_max = 0.75
+color = Color(0.84, 0.79, 0.68, 0.85)
+
+[node name="Presenter" type="Node" parent="." index="3"]
+script = ExtResource("2_pres")
