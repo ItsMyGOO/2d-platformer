@@ -3,6 +3,10 @@
 > 目标：在现有玩法基础上，按「工程质量优先」路线把项目向商业级标准完善。
 > 三项硬要求：代码规范落地、项目架构与核心代码文档化、美术统一 32×32。
 > 本文档是后续所有实施计划的总纲，各阶段完成后在「验收标准」处勾记。
+>
+> **当前进度（2026-09-06）**：阶段⓪-③ 已完成并勾记（25 个单元测试 + 探针基线 5/5 + CI 绿）。
+> **下一步：阶段④**。实施时先写该阶段的详细计划（参照 `Docs/plans/` 中阶段⓪-③ 计划的格式），
+> 审阅后再动手。下一期候选见 §5。
 
 ## 1. 现状盘点（2026-09-06）
 
@@ -119,22 +123,32 @@ PhantomCamera2D 的阻尼语义与 Camera2D `position_smoothing_speed` 不等价
    MaxSpeed 130→260、JumpVelocity -330→-660（GravityScale 1→2，跳跃高度随之 ×2）、
    MaxFallSpeed 520→1040、Dash 420→840、击退 ×2；土狼/缓冲/硬直等时长不变
 6. 视口 640×360 → **1280×720**（stretch 模式不变；窗口覆盖实施时定，建议 1920×1080）
+7. **AI 感知与像素偏移参数 ×2**：Slime 三根感知射线（WallRay/LedgeNearRay/LedgeFarRay 的
+   position/target_position）、ChaseDetector 半径 90→180、命中盒偏移（HitShape position (11,0)→(22,0)）、
+   尘土粒子发射点；AI 攻击距离（`SlimeAIInputSource` 内）随 ×2 重新标定
+8. **顺带修复已知僵持问题**：史莱姆追击停止距离大于攻击命中距离，导致停在射程外永不攻击
+   （2026-09-06 探针实测：停于玩家 26px 处 12s 未出招）；×2 标定后验证追击→攻击→命中闭环
+9. 更新 `Tools/headless_probe/Probe.cs` 的世界相关阈值（文件头注释已标注此项）
 
 **验收**：`Tools/headless_probe` 回归全绿——玩家可跳上 ×2 后平台、窄坑（32px）可跳过、
-宽坑（128px）AI 调头零落坑、追击/攻击触发正常；画面构图与 16×16 时代一致。
+宽坑（128px）AI 调头零落坑、追击/攻击触发正常（含僵持修复后命中玩家 HP 下降）；
+画面构图与 16×16 时代一致。
 
-### 阶段⑤ Phantom Camera 接入
+### 阶段⑤ Phantom Camera 接入与震屏打磨
 
 **任务**：
 
 1. `project.godot` 启用插件（editor_plugins 注册）
 2. `Player.tscn`：原生 `Camera2D` → `PhantomCamera2D` + 场景加 `PhantomCameraHost`，
    follow 玩家、边界限制对齐 ×2 后的关卡尺寸，阻尼调参对齐现手感（不预设数值）
-3. （可选）删除插件 `examples/` 目录瘦身仓库
-4. 新写 `Docs/camera-design.md`：节点结构、与旧 Camera2D 的参数映射、边界与限制用法
+3. **震屏打磨**：`PhantomCameraNoiseEmitter2D` 由既有事件驱动——出招（Motor.AttackStarted）、
+   受击（Health.Damaged）、落地（Motor.Landed）各配一组噪声参数；
+   强度/时长写进配置资源，可调可关
+4. （可选）删除插件 `examples/` 目录瘦身仓库
+5. 新写 `Docs/camera-design.md`：节点结构、与旧 Camera2D 的参数映射、震屏事件接线、边界与限制用法
 
-**验收**：编辑器无插件报错；手感与替换前主观一致（跟随平滑、无越界）；
-`Docs/camera-design.md` 完成。
+**验收**：编辑器无插件报错；跟随手感与替换前主观一致（平滑、无越界）；
+三处震屏触发正确且不打断跟随；`Docs/camera-design.md` 完成。
 
 ### 阶段⑥ 文档体系收尾
 
@@ -150,10 +164,17 @@ PhantomCamera2D 的阻尼语义与 Camera2D `position_smoothing_speed` 不等价
 
 **验收**：按 architecture.md 的「新增一种敌人」指引可在一小时内完成接入且无需读源码内部实现。
 
-## 5. 本期非目标
+## 5. 本期非目标与下一期候选
 
 UI/HUD/血条/菜单/暂停、音频、存档、TileMap 正式关卡、GdUnit4 集成测试、
-新敌人种类、连击/蓄力/弹体、本地化、正式美术资源。以上进入下一期规划。
+新敌人种类、连击/蓄力/弹体、本地化、正式美术资源。
+
+**下一期候选（2026-09-06 评审确定，按优先级）：**
+
+1. **UI 框架与开始游戏闭环**：主菜单/暂停/HUD 血条 + 菜单→游玩→死亡→重开的完整闭环
+2. **关卡加载与场景切换闭环**（相机边界随关卡走，衔接阶段⑤的相机基建）
+
+音频与正式美术资源随上述两项穿插。
 
 ## 6. 风险与备注
 
@@ -162,3 +183,13 @@ UI/HUD/血条/菜单/暂停、音频、存档、TileMap 正式关卡、GdUnit4 �
 - **Phantom Camera 与继承场景**：`Player.tscn` 继承自 `BaseCharacter.tscn`，相机节点在子场景，
   替换不触及基座；若遇导出属性前向解析问题，沿用「_Ready 类型发现」装配约定
 - **窗口覆盖分辨率**（阶段④-6）实施时按 1080p 屏幕实际观感定，非阻塞项
+
+## 7. 工具与环境备忘
+
+- **探针运行命令**：`"D:\Godot_v4.6.1-stable_mono_win64\Godot_v4.6.1-stable_mono_win64_console.exe"
+  --headless --path . Tools/headless_probe/Probe.tscn`（先 `dotnet build`；5 项全过退出码 0）
+- **格式化**：CSharpier 统一 1.3.0（`.config/dotnet-tools.json` 钉版；本机全局也是 1.3.0）。
+  提交前必跑 `dotnet csharpier format .` + `dotnet csharpier check .`。
+  **注意**：直接新建的文件可能是 CRLF，与 `.gitattributes`（`*.cs eol=lf`）不符，
+  且 csharpier 对两种行尾的判定不一致——曾导致"本地通过、CI 失败"。
+  新文件提交前用 format 过一遍即可归一（详见 `Docs/code-standards.md` §5）
