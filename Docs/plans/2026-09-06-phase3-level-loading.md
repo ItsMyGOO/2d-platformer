@@ -1,364 +1,406 @@
-# 第三期实施计划：关卡加载与场景切换闭环（路线图候选 2）
+# 第三期实施计划：穿透碰撞 + 接触伤害 + 九宫格房间流式世界
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **本计划取代 2026-09-06 的初版第三期计划**（离散关卡 Level/队列/黑场/LevelExit 方案）——
+> 经讨论确定：碰撞模型采用「全体穿透 + 接触伤害」，关卡加载采用「九宫格房间流式」
+> （银河恶魔城式无缝世界的最小落地）。
 
-**Goal:** 关卡自描述（相机边界 / 出口 / 下一关），Main 按线性队列加载关卡，触碰出口过场切换，末关回主菜单；相机边界随关卡走（验证宽于视口的可滚动关卡）；「主菜单 → 关卡 1 → 通关 → 关卡 2 → 回主菜单」闭环。
+**Goal:** 单位间全穿透（消除互挤/站头），敌人接触伤害常态化；世界改为 1280×720 房间网格，
+玩家所在格 ±1（3×3 窗口）的房间在场景树、其余缓存（节点不销毁，状态保留），
+相机边界升为世界级，主菜单 → 无缝世界 → 死亡重生（当前房间出生点）闭环。
 
-**Architecture:** 新增 `Level`（关卡数据根：边界 + 下一关路径 + 完成事件）与 `LevelExit`（出口 Area2D）进 `Gameplay/World/`；**相机边界从 Player.tscn 的 PCam 硬编码中移除**，改为关卡数据、由 `CameraRig` 沿祖先链发现关卡并应用（保证任何入口——Main 或探针——实例化关卡都生效）；Main 增加 fade 过渡与关卡队列。玩家每关全新实例（与现状一致）。
+**Architecture:** 物理层规范化（5 层各司其职，顺带修复层值/层名错位）；新增 `ContactDamager`
+常驻接触伤害组件；新增 `World`（Node2D，房间流式管理器）与房间规范（Spawn 标记、门口开口）；
+玩家成为世界的持久住民（不再是房间子节点）。状态机/帧序零改动。
 
-**Tech Stack:** Godot 4.6.1 (.NET/mono)、C# / net8.0、PCam `set_limit_*`（已确认存在）、CSharpier 1.3.0。
+**Tech Stack:** Godot 4.6.1 (.NET/mono)、C# / net8.0、PCam `set_limit_*`、CSharpier 1.3.0。
 
 **环境事实（本机已验证）：**
 
-- 基线：28 单元测试 + 探针 9/9 + CI 绿；出生点齐平规则已落地（TestLevel y=642）
-- PCam 的 `set_limit_left/top/right/bottom` 为公开 GDScript 方法（C# 侧 `Call("set_limit_left", v)` 即可）
-- 探针直接实例化 `TestLevel.tscn`（不经 Main）——关卡挂新脚本后探针路径不变，
-  这正是「边界应用必须在关卡侧完成」的约束来源
-- `TestLevel.tscn` 现根节点为纯 Node2D，无脚本
+- 基线：28 单元测试 + 探针 9/9 + CI 绿；出生点齐平规则已落地
+- **现层值与层名错位**（审计发现）：玩家受击盒实际值 3、敌人受击盒实际值 4，是「值当层号」配的；
+  project.godot 声明的 layer_3=player_hurtbox 并未被真正使用——本期一并归位
+- 世界地形（StaticBody2D 默认）与玩家身体**共用 layer 1**，是互挤/站头的根因；
+  穿透必须先把地形与玩家分izku Baba层
+- `ReceiveHit`/`OnHurt` 已返回 bool（第二期 F2），`Health` 无敌帧天然限频——接触伤害直接复用
+- 探针直接实例化关卡场景；改为实例化 World 后需同步改节点路径
+
+**物理层规范（本期生效，全项目以此为准）：**
+
+| 层号 | 位值 | 名称 | 用途 |
+|---|---|---|---|
+| 1 | 1 | terrain | 世界地形（唯一与身体碰撞的层） |
+| 2 | 2 | enemy_body | 敌人实体 |
+| 3 | 4 | player_hurtbox | 玩家受击盒 |
+| 4 | 8 | enemy_hurtbox | 敌人受击盒 |
+| 5 | 16 | player_body | 玩家实体（新） |
+
+掩码：身体 mask=1（只撞地形→单位全穿透）；玩家 Hitbox mask=8；敌人 Hitbox/ContactDamager
+mask=4；ChaseDetector mask=16；KillZone mask=1+2+16=19。
 
 ## 裁量点（审阅时可否决）
 
-1. **TestLevel 即第一关，不改名不挪目录**（探针/文档引用零扰动）；第二关为 `Level2.tscn`（最小变体，验证加载与相机滚动，非正式内容）。
-2. **死亡重生仍在关内**（不跨关卡、无检查点存续）；通关判定 = 触碰出口 Area2D，无结算页。
-3. **关卡队 linear 写死在 Main**（数组两个字段），关卡选择 UI 不做。
-4. **过渡为 0.2s 黑场淡入淡出**（Tween），不做异步加载（关卡场景极小，同步实例化即可；`LoadThreaded` 留给大关卡时代）。
-5. **PCam 默认 limits 改为放宽值**（-100000..100000 即插件默认），加载关卡时按数据覆盖；无 Level 祖先的边缘情况保持默认大边界（不设限）。
+1. **接触伤害数值复用 AttackConfig**（史莱姆 1 伤害、击退 280/200）——贴脸威胁与挥击同源，
+   不新增配置面；将来需要差异化再拆。
+2. **房间尺寸 1280×720**（单屏一格）；门口开口宽 96px、贴地面高 160px，**边界墙体由左侧房间承担**
+   （右侧房间不建左墙）——3×3 窗口数学上保证边界两侧房间同时在场，开口永远有效。
+3. **验证世界为 2 间房**（TestLevel 房间化 + 新建 RoomB，线性排列）；2×2 及以上留待正式内容。
+4. **重生点 = 当前房间的 Spawn 标记**（World 在玩家跨格时更新玩家重生点）；无存档系统。
+5. **移出树用 `CallDeferred("remove_child"/"add_child")`**，房间节点永久缓存不销毁——
+   击杀/位置状态天然保留；内存按测试世界规模可忽略。
+6. **玩家离开房间格子才切窗**（不做预判），探针/实机验证窗口切换的几何正确性。
+7. 相机边界硬编码从 Player.tscn 移除，改为 World 导出（缺 World 祖先时保持插件默认大边界）。
 
 ---
 
-### Task 1: Level 数据根 + LevelExit 出口
+### Task 1: 物理层规范化与单位穿透
 
 **Files:**
-- Create: `Game/Gameplay/World/Level.cs`
-- Create: `Game/Gameplay/World/LevelExit.cs`
+- Modify: `project.godot`（layer_names：layer_1 改名 terrain，新增 layer_5=player_body）
+- Modify: `Game/Scenes/BaseCharacter.tscn`（Hurtbox layer 3→4；Hitbox mask 4→8）
+- Modify: `Game/Scenes/Player.tscn`（根节点加 `collision_layer = 16`）
+- Modify: `Game/Scenes/Slime.tscn`（Hitbox mask 3→4；Hurtbox layer 4→8；ChaseDetector mask 1→16）
+- Modify: `Game/Scenes/TestLevel.tscn`（KillZone mask 3→19）
 
-- [ ] **Step 1: Level.cs（关卡数据根，挂关卡场景根节点）**
+- [ ] **Step 1: 按上表逐项改值**（project.godot `[layer_names]` 段：
+
+```ini
+[layer_names]
+
+2d_physics/layer_1="terrain"
+2d_physics/layer_2="enemy_body"
+2d_physics/layer_3="player_hurtbox"
+2d_physics/layer_4="enemy_hurtbox"
+2d_physics/layer_5="player_body"
+```
+
+- [ ] **Step 2: 构建、探针 9/9、提交**
+
+（本任务无行为变化预期：掩码配对等值迁移。史莱姆不再与玩家实体碰撞即穿透达成。）
+
+```bash
+dotnet build
+"$GODOT" --headless --path . Tools/headless_probe/Probe.tscn
+git add -A && git commit -m "feat: 物理层规范化并改为单位间穿透（消除互挤/站头）"
+```
+
+---
+
+### Task 2: 接触伤害（ContactDamager）
+
+**Files:**
+- Create: `Game/Gameplay/Characters/Combat/ContactDamager.cs`
+- Modify: `Game/Scenes/Slime.tscn`（挂 ContactDamager，body 同尺寸矩形）
+- Modify: `Game/Gameplay/Characters/Character.cs`（下发接触伤害数值，同 AttackConfig）
+
+- [ ] **Step 1: ContactDamager.cs**
 
 ```csharp
-using System;
 using Godot;
 
-namespace GodotGameTemplate.Gameplay.World;
+namespace GodotGameTemplate.Gameplay.Characters.Combat;
 
 /// <summary>
-/// 关卡数据根：世界边界（相机限制）、出口与下一关的声明。
-/// 不驱动玩法——完成事件由出口触发、由应用编排（Main）消费；探针等无编排者入口可安全忽略。
+/// 常驻接触伤害：每物理帧轮询重叠的 Hurtbox 并尝试结算——
+/// Health 无敌帧天然限频（每次受击后 0.8s 内重复接触无效）。
+/// 与挥击 Hitbox 互不影响；数值由编排者从配置下发。
 /// </summary>
-public partial class Level : Node2D
+public partial class ContactDamager : Area2D
 {
-    /// <summary>世界左边界（相机 limit_left，像素）。</summary>
-    [Export]
-    public int LimitLeft { get; set; }
+    private int _damage;
+    private float _knockbackHorizontal;
+    private float _knockbackVertical;
 
-    /// <summary>世界上边界（相机 limit_top，像素）。</summary>
-    [Export]
-    public int LimitTop { get; set; }
-
-    /// <summary>世界右边界（相机 limit_right，像素）。宽于视口即水平卷轴。</summary>
-    [Export]
-    public int LimitRight { get; set; } = 1280;
-
-    /// <summary>世界下边界（相机 limit_bottom，像素）。</summary>
-    [Export]
-    public int LimitBottom { get; set; } = 720;
-
-    /// <summary>通关后加载的下一关场景路径；空串表示末关（回主菜单）。</summary>
-    [Export]
-    public string NextLevelPath { get; set; } = string.Empty;
-
-    /// <summary>玩家触碰出口时触发一次。</summary>
-    public event Action Completed;
-
-    private bool _completed;
-
-    /// <summary>通关（出口触发；重复触碰只报一次）。</summary>
-    public void Complete()
+    /// <summary>由编排者下发数值（来源与挥击相同的 AttackConfig）。</summary>
+    public void Configure(int damage, float knockbackHorizontal, float knockbackVertical)
     {
-        if (_completed)
+        _damage = damage;
+        _knockbackHorizontal = knockbackHorizontal;
+        _knockbackVertical = knockbackVertical;
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        foreach (Area2D area in GetOverlappingAreas())
         {
-            return;
+            if (area is Hurtbox hurtbox)
+            {
+                float direction = MathF.Sign(hurtbox.GlobalPosition.X - GlobalPosition.X);
+                if (direction == 0f)
+                {
+                    direction = 1f;
+                }
+                hurtbox.ReceiveHit(
+                    DamageInfo.Create(_damage, _knockbackHorizontal, _knockbackVertical, direction)
+                ); // 拒伤（无敌/尸体）由 Health 静默吞掉，接触伤害无命中确认事件
+            }
         }
-        _completed = true;
-        Completed?.Invoke();
     }
 }
 ```
 
-- [ ] **Step 2: LevelExit.cs**
+（需 `using System;`。）
+
+- [ ] **Step 2: Slime.tscn 挂载 + Character 下发**
+
+Slime.tscn 新增（与身体同尺寸的矩形 Area2D，mask=4，layer=0）：
+
+```ini
+[node name="ContactDamager" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+script = ExtResource("13_contact")
+
+[node name="Shape" type="CollisionShape2D" parent="ContactDamager"]
+shape = SubResource("contact_shape")
+```
+
+（`contact_shape` RectangleShape2D (24, 28)，与身体一致；load_steps 同步。）
+Character._Ready 在 Configure 攻击的同一段落补：
 
 ```csharp
+        if (_config.Attack != null)
+        {
+            _hitbox?.Configure(...);           // 既有
+            this.FindDescendant<ContactDamager>()?
+                .Configure(_config.Attack.Damage,
+                    _config.Attack.KnockbackHorizontal,
+                    _config.Attack.KnockbackVertical);
+        }
+```
+
+- [ ] **Step 3: 验证与提交**
+
+实机：贴脸史莱姆约 0.8s 掉 1 血并被弹开；受击震屏自动生效（走 Damaged）。
+探针 9/9（跑坑段可能因接触伤害减速，帧常量按 `[trip]` 输出微调）：
+
+```bash
+dotnet csharpier format . && dotnet build && dotnet test Tests/UnitTests/GodotGameTemplate.UnitTests.csproj
+"$GODOT" --headless --path . Tools/headless_probe/Probe.tscn
+git add -A && git commit -m "feat: 敌人接触伤害（ContactDamager 常驻，无敌帧限频）"
+```
+
+---
+
+### Task 3: World 房间流式管理器
+
+**Files:**
+- Create: `Game/Gameplay/World/World.cs`
+- Modify: `Game/Gameplay/Characters/Character.cs`（`SetSpawnPoint`）
+- Modify: `Game/Gameplay/Characters/CameraRig.cs`（Level 改 World，应用世界边界）
+- Modify: `Game/Scenes/Player.tscn`（PCam 四行硬编码 limits 删除）
+
+- [ ] **Step 1: World.cs**
+
+```csharp
+using System.Collections.Generic;
 using Godot;
 using GodotGameTemplate.Gameplay.Characters;
 
 namespace GodotGameTemplate.Gameplay.World;
 
 /// <summary>
-/// 关卡出口：玩家触碰即视为通关（沿祖先链通知所属 Level）。mask 由场景配置（玩家实体层）。
+/// 九宫格房间流式管理：世界 = 1280×720 房间网格（Rooms 子节点按网格坐标摆放）。
+/// 玩家所在格 ±1 的房间在树，其余 RemoveChild 缓存（节点不销毁——击杀/位置状态保留，
+/// 回窗即恢复）。跨格时更新玩家重生点为当前房间的 Spawn 标记。
 /// </summary>
-public partial class LevelExit : Area2D
+public partial class World : Node2D
 {
+    /// <summary>房间网格尺寸（像素）。</summary>
+    [Export]
+    public Vector2I RoomSize { get; set; } = new(1280, 720);
+
+    /// <summary>世界相机边界（四值，加载时由 CameraRig 应用）。</summary>
+    [Export]
+    public int LimitLeft { get; set; }
+
+    [Export]
+    public int LimitTop { get; set; }
+
+    [Export]
+    public int LimitRight { get; set; } = 1280;
+
+    [Export]
+    public int LimitBottom { get; set; } = 720;
+
+    private Node2D _rooms;
+    private Character _player;
+    private readonly Dictionary<Vector2I, Node2D> _roomsByCell = new();
+    private Vector2I _currentCell;
+
     public override void _Ready()
     {
-        BodyEntered += OnBodyEntered;
+        _rooms = GetNode<Node2D>("Rooms");
+        foreach (Node2D room in _rooms.GetChildren())
+        {
+            var cell = new Vector2I(
+                (int)(room.Position.X / RoomSize.X),
+                (int)(room.Position.Y / RoomSize.Y)
+            );
+            _roomsByCell[cell] = room;
+        }
+        _player = GetNode<Character>("Player");
+        _currentCell = CellOf(_player.GlobalPosition);
+        ApplyWindow();
+        if (_roomsByCell.TryGetValue(_currentCell, out Node2D room))
+        {
+            _player.SetSpawnPoint(SpawnOf(room));
+        }
     }
 
-    private void OnBodyEntered(Node2D body)
+    public override void _PhysicsProcess(double delta)
     {
-        if (body is not Character)
+        Vector2I cell = CellOf(_player.GlobalPosition);
+        if (cell == _currentCell)
         {
             return;
         }
-        Node current = GetParent();
-        while (current != null)
+        _currentCell = cell;
+        ApplyWindow();
+        if (_roomsByCell.TryGetValue(cell, out Node2D room))
         {
-            if (current is Level level)
+            _player.SetSpawnPoint(SpawnOf(room));
+        }
+    }
+
+    private Vector2I CellOf(Vector2 global) => new(
+        (int)(global.X / RoomSize.X),
+        (int)(global.Y / RoomSize.Y)
+    );
+
+    private Vector2 SpawnOf(Node2D room) =>
+        room.GetNodeOrNull<Marker2D>("Spawn")?.GlobalPosition ?? room.GlobalPosition;
+
+    private void ApplyWindow()
+    {
+        foreach ((Vector2I cell, Node2D room) in _roomsByCell)
+        {
+            bool inWindow =
+                Math.Abs(cell.X - _currentCell.X) <= 1
+                && Math.Abs(cell.Y - _currentCell.Y) <= 1;
+            bool inTree = room.GetParent() != null;
+            if (inWindow && !inTree)
             {
-                level.Complete();
-                return;
+                _rooms.CallDeferred("add_child", room);
             }
-            current = current.GetParent();
+            else if (!inWindow && inTree)
+            {
+                _rooms.CallDeferred("remove_child", room);
+            }
         }
     }
 }
 ```
 
-- [ ] **Step 3: 构建并提交**
+- [ ] **Step 2: Character.SetSpawnPoint**
+
+```csharp
+    /// <summary>更新重生点（世界流式下由房间管理器在跨格时调用；默认为初始出生点）。</summary>
+    public void SetSpawnPoint(Vector2 globalPosition) => _spawnPosition = globalPosition;
+```
+
+- [ ] **Step 3: CameraRig 边界来源改 World**
+
+`ApplyLevelLimits` 重命名 `ApplyWorldLimits`，祖先链匹配 `World.World`，四值
+`set_limit_left/top/right/bottom`；Player.tscn PCam 删除 `limit_left/top/right/bottom` 四行。
+
+- [ ] **Step 4: 构建提交**（World 尚无场景，纯编译级验证）
 
 ```bash
 dotnet csharpier format . && dotnet build
-git add Game/Gameplay/World/
-git commit -m "feat: Level 关卡数据根与 LevelExit 出口"
+git add -A && git commit -m "feat: World 九宫格房间流式管理器与重生点随房间"
 ```
 
 ---
 
-### Task 2: 相机边界随关卡（CameraRig 应用，Player 硬编码移除）
+### Task 4: 世界场景与两个房间（探针切 World）
 
 **Files:**
-- Modify: `Game/Gameplay/Characters/CameraRig.cs`（Bind 时沿祖先链找 Level 应用边界）
-- Modify: `Game/Scenes/Player.tscn`（PCam 的 limit_left/top/right/bottom 四行删除，load_steps 不变）
-- Modify: `Game/Scenes/TestLevel.tscn`（根节点挂 Level.cs + 导出边界 0/0/1280/720 + NextLevelPath 指向 Level2）
+- Create: `Game/Scenes/World.tscn`（World 根 + Rooms/ + 两个房间实例 + Player 实例）
+- Create: `Game/Scenes/RoomB.tscn`（第二房间）
+- Modify: `Game/Scenes/TestLevel.tscn`（房间化：加 Spawn 标记；右墙改为带门口开口两段）
+- Modify: `Tools/headless_probe/Probe.cs`（实例化 World，节点路径改 World/Player 等）
 
-- [ ] **Step 1: CameraRig 增加边界应用**
+- [ ] **Step 1: TestLevel 房间化**
 
-`Bind` 末尾追加：
+- 右墙 `WallRight`（整墙 32×1600 @ (1296,360)）改为两段：上段 size (32, 496) @ (1296, 248)
+  （跨 y 0–496），y 496–656 留作门口开口（宽 96 需两房间错位互补——A 的开口在 x 1280–1312 墙上
+  开 96px 高 160px：上段 + 下段 size (32, 1600-496-160=944)?? **以实跑几何为准**：
+  开口垂直范围 y 496–656（地面之上 160px），A 右墙 = 上段 (32,496)@y248 + 下段 (32,944)@y1128。
+  RoomB **不建左墙**（边界墙由左房承担）。
+- 根节点下加 `[node name="Spawn" type="Marker2D"] position = Vector2(128, 642)`。
 
-```csharp
-        ApplyLevelLimits();
-```
+- [ ] **Step 2: RoomB.tscn（第二房间，x 世界 1280–2560）**
 
-新方法（放 `Snap` 附近）：
+布局：地面 GroundA size (1280, 64) @ (1920, 688)（跨 1280–2560，地面顶同为 656）；
+平台 (1900, 576)；右墙 (2576, 360) 整墙；左墙无；KillZone (1920, 960) size (1600, 64)；
+Slime1 @ (1900, 642)；Spawn @ (1408, 642)；Sky 1280×720 @ offset (1280, 0)（纯装饰色块）。
 
-```csharp
-    /// <summary>沿祖先链找关卡数据，把世界边界应用到 PCam（无 Level 祖先则保持默认）。</summary>
-    private void ApplyLevelLimits()
-    {
-        Node current = GetParent();
-        while (current != null)
-        {
-            if (current is World.Level level && _pcam != null)
-            {
-                _pcam.Call("set_limit_left", level.LimitLeft);
-                _pcam.Call("set_limit_top", level.LimitTop);
-                _pcam.Call("set_limit_right", level.LimitRight);
-                _pcam.Call("set_limit_bottom", level.LimitBottom);
-                return;
-            }
-            current = current.GetParent();
-        }
-    }
-```
-
-- [ ] **Step 2: Player.tscn 移除硬编码边界；TestLevel 挂 Level**
-
-Player.tscn 的 `PlayerPhantomCamera2D` 节点删除这四行：`limit_left/limit_top/limit_right/limit_bottom`。
-TestLevel.tscn 加 ext_resource（Level.cs）并在根节点挂脚本与导出：
+- [ ] **Step 3: World.tscn**
 
 ```ini
-[ext_resource type="Script" path="res://Game/Gameplay/World/Level.cs" id="4_level"]
-
-[node name="TestLevel" type="Node2D"]
-script = ExtResource("4_level")
+[node name="World" type="Node2D"]
+script = ExtResource("world")
 LimitLeft = 0
 LimitTop = 0
-LimitRight = 1280
+LimitRight = 2560
 LimitBottom = 720
-NextLevelPath = "res://Game/Scenes/Level2.tscn"
+
+[node name="Rooms" type="Node2D" parent="."]
+
+[node name="TestLevel" parent="Rooms" instance=ExtResource("room_a")]   # 位置 (0,0)
+
+[node name="RoomB" parent="Rooms" instance=ExtResource("room_b")]      # 位置 (1280,0)
+
+[node name="Player" parent="." instance=ExtResource("player")]          # @ (128, 642)
 ```
 
-（load_steps +1；探针的 GetNode 路径不受根节点挂脚本影响。）
+- [ ] **Step 4: 探针切 World**
 
-- [ ] **Step 3: 验证与提交**
+Probe._Ready 改实例化 `World.tscn`；路径：`World/Player`、`World/Rooms/TestLevel/Slime1`、
+`World/Rooms/TestLevel/Slime2`。断言不变（房间 A 几何 = 原 TestLevel）。注意 World 流式
+会把 RoomB 移出树——探针无感。若落坑/跑坑帧数漂移按 `[trip]` 微调。
 
-探针 9/9（探针玩家边界由 TestLevel 数据应用，行为与原硬编码一致）：
+- [ ] **Step 5: 验证与提交**
 
 ```bash
 dotnet csharpier format . && dotnet build
+"$GODOT" --headless --path . Tools/headless_probe/Probe.tscn   # 9/9
+git add -A && git commit -m "feat: 两房间世界与九宫格流式（跨房间无缝行走、状态缓存）"
+```
+
+---
+
+### Task 5: Main 接入世界
+
+**Files:**
+- Modify: `Game/UI/Main.cs`（StartGame 实例化 `World.tscn`；玩家路径 `LevelRoot/World/Player`）
+
+- [ ] **Step 1: 替换加载路径并删除关卡队列残留**（第二期未实装队列——直接换路径即可），
+
+菜单 → 开始 → 无缝世界（无过场）；回主菜单释放 World。headless 冒烟（菜单无报错）+
+探针 9/9 + 提交：
+
+```bash
+dotnet csharpier format . && dotnet build
+timeout 12 "$GODOT" --headless --path . Game/Scenes/Main.tscn 2>&1 | grep -iE "error|exception"
 "$GODOT" --headless --path . Tools/headless_probe/Probe.tscn
-git add -A && git commit -m "feat: 相机边界改为关卡数据（CameraRig 沿祖先链应用），Player 硬编码移除"
+git add -A && git commit -m "feat: 主菜单接入无缝世界"
 ```
 
 ---
 
-### Task 3: 关卡出口落地 + Main 关卡队列与过渡
-
-**Files:**
-- Modify: `Game/Scenes/TestLevel.tscn`（加 LevelExit 于 GroundC 右端 x≈1240）
-- Modify: `Game/UI/Main.cs`（关卡队列 + 通关接续 + 黑场过渡）
-- Modify: `Game/Scenes/Main.tscn`（UiLayer 下加 Fade 层）
-
-- [ ] **Step 1: TestLevel 出口**
-
-```ini
-[ext_resource type="Script" path="res://Game/Gameplay/World/LevelExit.cs" id="5_exit"]
-
-[node name="LevelExit" type="Area2D" parent="."]
-position = Vector2(1240, 600)
-collision_layer = 0
-collision_mask = 1
-script = ExtResource("5_exit")
-
-[node name="Shape" type="CollisionShape2D" parent="LevelExit"]
-shape = SubResource("exit_shape")
-```
-
-`exit_shape` RectangleShape2D (48, 96)，占位即可（正式美术期换门形）。
-
-- [ ] **Step 2: Main 关卡队列与过渡**
-
-Main.cs 改造要点（保持既有事件接线不动）：
-
-```csharp
-    private static readonly string[] LevelPaths =
-    [
-        "res://Game/Scenes/TestLevel.tscn",
-        "res://Game/Scenes/Level2.tscn",
-    ];
-
-    private int _levelIndex;
-    private ColorRect _fade;
-    private bool _transitioning;
-
-    // StartGame → LoadLevel(0)；StartGame 内订阅关卡完成：
-    private void LoadLevel(int index)
-    {
-        _levelIndex = index;
-        _level = GD.Load<PackedScene>(LevelPaths[index]).Instantiate();
-        _level.Name = "Level";
-        _levelRoot.AddChild(_level);
-        if (_level is World.Level level)
-        {
-            level.Completed += OnLevelCompleted;
-        }
-        var player = _levelRoot.GetNode<Character>("Level/Player");
-        _hud = GD.Load<PackedScene>("res://Game/UI/Hud.tscn").Instantiate<Hud>();
-        GetNode("UiLayer").AddChild(_hud);
-        _hud.Bind(player.Health);
-    }
-
-    private async void OnLevelCompleted()
-    {
-        if (_transitioning)
-        {
-            return;
-        }
-        _transitioning = true;
-        await FadeAsync(1f);                       // 黑场
-        _level?.QueueFree();
-        _level = null;
-        if (_hud != null) { _hud.QueueFree(); _hud = null; }
-        bool hasNext = _levelIndex + 1 < LevelPaths.Length;
-        if (hasNext)
-        {
-            LoadLevel(_levelIndex + 1);
-        }
-        else
-        {
-            BackToMainMenu();
-        }
-        await FadeAsync(0f);                       // 亮场
-        _transitioning = false;
-    }
-
-    private async Godot.Collections.Array FadeAsync(float targetAlpha)
-    {
-        var tween = CreateTween();
-        tween.TweenProperty(_fade, "color:a", targetAlpha, 0.2);
-        return await ToSignal(tween, Tween.SignalName.Finished);
-    }
-```
-
-注意：`BackToMainMenu` 在过渡中调用时不重复淡出（黑场下切菜单）；`_UnhandledInput` 的 Esc
-在 `_transitioning` 期间忽略。`Main.tscn` UiLayer 下加：
-
-```ini
-[node name="Fade" type="ColorRect" parent="UiLayer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color(0, 0, 0, 0)
-mouse_filter = 2
-```
-
-（`mouse_filter=2` 忽略鼠标，透明时不遮挡；Main._Ready 缓存 `_fade` 引用。）
-
-- [ ] **Step 3: 构建冒烟与提交**
-
-```bash
-dotnet csharpier format . && dotnet build
-timeout 12 "$GODOT" --headless --path . Game/Scenes/Main.tscn 2>&1 | grep -iE "error|exception"   # 菜单加载无报错
-git add -A && git commit -m "feat: 关卡队列与黑场过渡（通关接续下一关，末关回主菜单）"
-```
-
----
-
-### Task 4: Level2（验证关卡加载与相机滚动）
-
-**Files:**
-- Create: `Game/Scenes/Level2.tscn`
-
-- [ ] **Step 1: 关卡内容（最小变体但必须证明两件事：加载切换、宽视口边界滚动）**
-
-世界宽 1600（相机需水平卷轴），布局：
-
-| 节点/资源 | 值 |
-|---|---|
-| 根 Level（挂 Level.cs） | Limit 0/0/**1600**/720；NextLevelPath = ""（末关→回菜单） |
-| Sky | 1600×720 |
-| GroundA | size (800, 64) @ (400, 688)，跨 0–800 |
-| 宽坑 | 800–928（128px） |
-| GroundB | size (672, 64) @ (1264, 688)，跨 928–1600 |
-| Platform | size (96, 32) @ (560, 576) |
-| 墙 | 左 (-16, 360)、右 (1616, 360)，size (32, 1600) |
-| PitFloor / KillZone | @ (800, 1000) / (800, 960)，横向覆盖 0–1600 |
-| Slime1 | @ (1080, 642) |
-| Player | @ (128, 642)（齐平规则） |
-| LevelExit | @ (1544, 600) |
-| Fill/Top 色块 | 与 TestLevel 同风格，随几何 ×2 对应 |
-
-（Fill/Top 的 offsets 按 TestLevel 现值等比换算：GroundA Fill ±400/±32、Top -32/-24，以此类推。）
-
-- [ ] **Step 2: 编辑器实跑验证并提交**
-
-主菜单开始 → 通关 TestLevel（触碰出口）→ 黑场 → Level2 加载（相机随玩家横向滚动、
-边界 1600 生效、玩家不越界）→ 通关 Level2 → 回主菜单。落坑死亡重生在两关内各自正常。
-
-```bash
-git add -A && git commit -m "feat: 第二关卡（宽视口卷轴，验证关卡加载与相机边界随关卡）"
-```
-
----
-
-### Task 5: 文档同步、全量回归与勾记
+### Task 6: 文档同步、全量回归与勾记
 
 - [ ] **Step 1: 文档**
 
-- `architecture.md`：§1 目录注明 Levels 相关；§8 新增敌人指南补「出生齐平 + 关卡根挂 Level.cs、
-  填 Limit 与 NextLevelPath」；新增 §12「关卡系统」小节（Level/LevelExit/CameraRig 边界链路、
-  关卡队列与过渡、新增一关的步骤 checklist）
-- `camera-design.md`：边界一节改写（「边界属于关卡数据，Player 不再持有；CameraRig 加载时应用」）
-- `README.md`：玩法段补「触碰出口进入下一关」；文档履历更新
-- `engineering-roadmap.md`：候选 2 标注 ✅（第三期交付）；§5.1 追加第三期小节
+- `architecture.md`：§1 目录补 `World`；**§4 物理层表格更新为五层规范**（并记录历史错位已修复）；
+  新增 §12「世界与房间流式」（网格/窗口/缓存/重生点语义/新增一个房间的 checklist：
+  复制房间场景 → 边界几何对齐 → 摆进 World.tscn 网格坐标 → Spawn 标记）
+- `camera-design.md`：边界一节改为「世界级边界，World 导出，CameraRig 应用」
+- `README.md`：玩法段（穿透/接触伤害/无缝房间）；操作表不变
+- `engineering-roadmap.md`：候选 2 标注 ✅（第三期：九宫格房间流式）；§5.1 追加第三期小节
+  （穿透+接触伤害 / 房间流式两项）
 
 - [ ] **Step 2: 全量回归（CI 等价三连 + 探针 9/9）并推送**
 
@@ -372,14 +414,15 @@ gh run view $(gh run list --limit 1 --json databaseId --jq '.[0].databaseId')
 
 - [ ] **Step 3: 实机验收（用户参与）**
 
-完整走查：菜单 → 关卡 1（探索/战斗/落坑重生）→ 触碰出口过场 → 关卡 2（相机卷轴、
-边界不越界）→ 通关回主菜单；期间 Esc 暂停、HUD、震屏、死亡重生均正常。
+完整走查：主菜单 → 世界（与史莱姆贴脸验证接触伤害节奏/弹开）→ 穿过门口进 RoomB
+（无缝、无黑场；回走验证 RoomA 状态保留——被击杀过的史莱姆不再复活）→ RoomB 落坑重生
+（回 RoomB 出生点、相机瞬移）→ 回主菜单。Esc 暂停、HUD、命中/受击震屏正常。
 
 ---
 
 ## 非目标（本期不做）
 
-- 关卡选择 UI、关卡解锁存档、Game Over 结算页
-- 异步/流式加载（关卡体量增大后引入 `ResourceLoader.LoadThreaded`）
-- 正式关卡内容设计（Level2 仅为验证用最小变体）与 TileMap 关卡格式
-- AI 无敌期攻击问题（已记录，随 AI 行为完善处理）
+- 房间内敌人冻结策略（3×3 全模拟，规模大了再引入休眠）
+- 跨房间持久化存档、小地图、房间解锁/锁门机制
+- 世界规模扩充（正式房间内容设计）与 TileMap
+- AI 无敌期攻击问题（已记录路线图，随 AI 行为完善处理）
