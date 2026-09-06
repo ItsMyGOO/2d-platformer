@@ -34,6 +34,10 @@ public partial class Character : CharacterBody2D
     /// <summary>重生完成时触发（表现层订阅，如相机瞬移到出生点）。</summary>
     public event Action Respawned;
 
+    /// <summary>该单位死亡时触发一次（血量归零与环境即死统一走此事件；
+    /// 表现层订阅做死亡反馈。血量明细仍看 Health.Died）。</summary>
+    public event Action Died;
+
     private Hitbox _hitbox;
     private Hurtbox _hurtbox;
     private Vector2 _spawnPosition;
@@ -146,6 +150,7 @@ public partial class Character : CharacterBody2D
 
     private void DieAndSchedule()
     {
+        Died?.Invoke();
         Motor.Kill();
         _hitbox?.SetActive(false);
         _deathCountdown = DeathDuration;

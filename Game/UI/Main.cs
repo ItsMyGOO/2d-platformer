@@ -64,7 +64,7 @@ public partial class Main : Node
         var player = _levelRoot.GetNode<Character>("Level/Player");
         _hud = GD.Load<PackedScene>("res://Game/UI/Hud.tscn").Instantiate<Hud>();
         GetNode("UiLayer").AddChild(_hud);
-        _hud.Bind(player.Health);
+        _hud.Bind(player);
         _state = AppState.Playing;
     }
 
