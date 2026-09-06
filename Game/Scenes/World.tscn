@@ -1,0 +1,24 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Game/Gameplay/World/World.cs" id="1_world"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/TestLevel.tscn" id="2_room_a"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/RoomB.tscn" id="3_room_b"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/RoomC.tscn" id="4_room_c"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/Player.tscn" id="5_player"]
+
+[node name="World" type="Node2D"]
+script = ExtResource("1_world")
+LimitRight = 3840
+
+[node name="Rooms" type="Node2D" parent="."]
+
+[node name="TestLevel" parent="Rooms" instance=ExtResource("2_room_a")]
+
+[node name="RoomB" parent="Rooms" instance=ExtResource("3_room_b")]
+position = Vector2(1280, 0)
+
+[node name="RoomC" parent="Rooms" instance=ExtResource("4_room_c")]
+position = Vector2(2560, 0)
+
+[node name="Player" parent="." instance=ExtResource("5_player")]
+position = Vector2(128, 642)

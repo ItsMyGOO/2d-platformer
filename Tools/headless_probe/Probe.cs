@@ -53,11 +53,11 @@ public partial class Probe : Node
 
     public override void _Ready()
     {
-        var level = GD.Load<PackedScene>("res://Game/Scenes/TestLevel.tscn").Instantiate();
-        AddChild(level);
-        _player = GetNode<Character>("TestLevel/Player");
-        _slime1 = GetNode<Character>("TestLevel/Slime1");
-        _slime2 = GetNode<Character>("TestLevel/Slime2");
+        var world = GD.Load<PackedScene>("res://Game/Scenes/World.tscn").Instantiate();
+        AddChild(world);
+        _player = GetNode<Character>("World/Player");
+        _slime1 = GetNode<Character>("World/Rooms/TestLevel/Slime1");
+        _slime2 = GetNode<Character>("World/Rooms/TestLevel/Slime2");
         _slime1.Motor.AttackStarted += () => _slime1AttackCount++;
         // 物理未运行，GlobalPosition 即场景出生点；用它做落坑判定基准
         // （不能用运行中的 y 采样：巡逻跳跃中的史莱姆会污染基准）

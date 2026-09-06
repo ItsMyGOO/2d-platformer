@@ -53,6 +53,19 @@ public partial class World : Node2D
         }
     }
 
+    public override void _ExitTree()
+    {
+        // 缓存中的房间不在场景树上，不会随树销毁——释放世界时必须显式清理，
+        // 否则每次「回主菜单再开始」都泄漏一轮房间节点
+        foreach ((_, Node2D room) in _roomsByCell)
+        {
+            if (room.GetParent() == null)
+            {
+                room.QueueFree();
+            }
+        }
+    }
+
     public override void _PhysicsProcess(double delta)
     {
         Vector2I cell = CellOf(_player.GlobalPosition);

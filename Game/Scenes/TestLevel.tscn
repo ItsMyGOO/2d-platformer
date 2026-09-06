@@ -1,6 +1,5 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
-[ext_resource type="PackedScene" path="res://Game/Scenes/Player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://Game/Scenes/Slime.tscn" id="2_slime"]
 [ext_resource type="Script" path="res://Game/Gameplay/World/KillZone.cs" id="3_kill"]
 
@@ -18,6 +17,12 @@ size = Vector2(96, 32)
 
 [sub_resource type="RectangleShape2D" id="wall"]
 size = Vector2(32, 1600)
+
+[sub_resource type="RectangleShape2D" id="wall_door_top"]
+size = Vector2(32, 496)
+
+[sub_resource type="RectangleShape2D" id="wall_door_bottom"]
+size = Vector2(32, 944)
 
 [sub_resource type="RectangleShape2D" id="catcher"]
 size = Vector2(1280, 32)
@@ -122,7 +127,13 @@ shape = SubResource("wall")
 position = Vector2(1296, 360)
 
 [node name="Shape" type="CollisionShape2D" parent="WallRight"]
-shape = SubResource("wall")
+shape = SubResource("wall_door_top")
+
+[node name="Shape2" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("wall_door_bottom")
+
+[node name="Spawn" type="Marker2D" parent="."]
+position = Vector2(128, 642)
 
 [node name="PitFloor" type="StaticBody2D" parent="."]
 position = Vector2(640, 1000)
@@ -138,9 +149,6 @@ script = ExtResource("3_kill")
 
 [node name="Shape" type="CollisionShape2D" parent="KillZone"]
 shape = SubResource("killzone")
-
-[node name="Player" parent="." instance=ExtResource("1_player")]
-position = Vector2(128, 642)
 
 [node name="Slime1" parent="." instance=ExtResource("2_slime")]
 position = Vector2(680, 642)
