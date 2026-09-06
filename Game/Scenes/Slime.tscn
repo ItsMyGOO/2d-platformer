@@ -17,13 +17,13 @@ _config = ExtResource("3_cfg")
 sprite_frames = ExtResource("4_frames")
 
 [node name="Hitbox" parent="Pivot" index="1"]
-collision_mask = 3
+collision_mask = 4
 
 [node name="HitShape" parent="Pivot/Hitbox" index="0"]
 position = Vector2(20, 0)
 
 [node name="Hurtbox" parent="Pivot" index="2"]
-collision_layer = 4
+collision_layer = 8
 
 [node name="WallRay" type="RayCast2D" parent="."]
 position = Vector2(0, -2)
@@ -39,7 +39,7 @@ target_position = Vector2(60, 20)
 
 [node name="ChaseDetector" type="Area2D" parent="."]
 collision_layer = 0
-collision_mask = 1
+collision_mask = 16
 monitorable = false
 
 [node name="VisionShape" type="CollisionShape2D" parent="ChaseDetector"]

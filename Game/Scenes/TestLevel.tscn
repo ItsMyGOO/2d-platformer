@@ -133,7 +133,7 @@ shape = SubResource("catcher")
 [node name="KillZone" type="Area2D" parent="."]
 position = Vector2(640, 960)
 collision_layer = 0
-collision_mask = 3
+collision_mask = 19
 script = ExtResource("3_kill")
 
 [node name="Shape" type="CollisionShape2D" parent="KillZone"]

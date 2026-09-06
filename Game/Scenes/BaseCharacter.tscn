@@ -28,7 +28,7 @@ position = Vector2(0, -2)
 
 [node name="Hitbox" type="Area2D" parent="Pivot"]
 collision_layer = 0
-collision_mask = 4
+collision_mask = 8
 monitoring = false
 monitorable = false
 script = ExtResource("4_hitbox")
@@ -46,7 +46,7 @@ offset_bottom = 10.0
 color = Color(1, 0.3, 0.3, 0.3)
 
 [node name="Hurtbox" type="Area2D" parent="Pivot"]
-collision_layer = 3
+collision_layer = 4
 collision_mask = 0
 monitoring = false
 script = ExtResource("5_hurtbox")

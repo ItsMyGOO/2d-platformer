@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://Game/Gameplay/Characters/CameraRig.cs" id="12_rig"]
 
 [node name="Player" unique_id=1613628459 instance=ExtResource("1_base")]
+collision_layer = 16
 _config = ExtResource("3_cfg")
 
 [node name="Sprite" parent="Pivot" index="0"]
