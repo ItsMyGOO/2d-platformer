@@ -3,4 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- 测试项目独立编译：SDK 会递归 glob 根目录 .cs，不排除会把测试源码并入主程序集 -->
+    <Compile Remove="Tests/**" />
+  </ItemGroup>
 </Project>
