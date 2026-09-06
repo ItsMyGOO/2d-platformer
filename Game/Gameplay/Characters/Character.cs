@@ -23,6 +23,7 @@ public partial class Character : CharacterBody2D
     private CharacterPresenter _presenter;
 
     private ScreenShake _screenShake;
+    private CameraRig _cameraRig;
 
     /// <summary>逻辑层宿主：编排者内部驱动，表现层与探针只读。</summary>
     public CharacterMotor Motor { get; private set; }
@@ -67,6 +68,8 @@ public partial class Character : CharacterBody2D
         _presenter?.Bind(Motor, Health);
         _screenShake = this.FindDescendant<ScreenShake>();
         _screenShake?.Bind(Health, _hitbox);
+        _cameraRig = this.FindDescendant<CameraRig>();
+        _cameraRig?.Bind(this);
 
         _spawnPosition = GlobalPosition;
     }
