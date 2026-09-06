@@ -51,7 +51,8 @@ InputSource  ──▶  InputIntent  ──▶  CharacterMotor  ──▶  Chara
   - 土狼时间（离地 CoyoteTime 内仍可起跳）；
   - 跳跃缓冲（落地前 JumpBufferTime 内按跳生效）；
   - 可变跳跃高度（上升中松开跳跃键，上升速度乘 JumpCutMultiplier，一次性）。
-- 状态 `Idle/Run/Jump/Fall` 为推导式：由地面事实 + 速度实时计算，不是独立状态机。
+- 状态 `Idle/Run/Jump/Fall` 为推导式：由地面事实 + 速度实时计算，不是独立状态机
+  （已被类式状态机取代，保留为历史描述，见 combat 文档）。
 - 事件 `Jumped` / `Landed`（C# event）供表现层订阅。
 - 起跳后立即烧掉土狼时间与缓冲，杜绝同帧二连跳。
 - 数值全部来自 `CharacterConfig : Resource`；玩家与史莱姆各一份 `.tres`。
@@ -80,37 +81,52 @@ C# 脚本的 **Node 类型导出成员在场景实例化时无法解析前向 No
 
 ## 文件清单
 
+> 当前权威结构见 [architecture.md](architecture.md) §1；下表为本文写作时的粒度，
+> `CharacterState.cs` 的职责已从「状态枚举」变为状态机抽象基类。
+
 ```
 Game/Gameplay/Characters/
 ├── Character.cs                  # 编排者（CharacterBody2D）
-├── CharacterConfig.cs            # Resource 数值配置
+├── CharacterConfig.cs            # Resource 数值配置（编辑态）
+├── CharacterConfigData.cs        # 运行态数值配置（纯 C# POCO）
 ├── CharacterMotor.cs             # 逻辑层（纯 C# 类）
-├── CharacterState.cs             # 状态枚举（推导式）
+├── CharacterState.cs             # 状态机抽象基类（原「状态枚举」，见 combat 文档）
+├── DashConfig.cs / AttackConfig.cs  # 冲刺/攻击嵌套配置
 ├── InputIntent.cs                # 意图数据（readonly struct）
 ├── CharacterPresenter.cs         # 表现层
+├── ScreenShake.cs                # 表现层：命中/受击震屏接线
+├── Combat/                       # DamageInfo / Health / Hitbox / Hurtbox
+├── States/                       # 类式状态机（Grounded/Airborne/Dash/Attack/Hurt/Dead）
 └── InputSources/
     ├── InputSource.cs            # 输入层抽象（abstract Node）
     ├── PlayerInputSource.cs      # 玩家键盘输入
-    └── SlimeAIInputSource.cs     # 史莱姆 AI（射线感知巡逻）
+    └── SlimeAIInputSource.cs     # 史莱姆 AI（射线感知巡逻/追击/攻击）
 Game/Config/
 ├── player_config.tres            # 玩家数值
-└── slime_config.tres             # 史莱姆数值
-Game/Art/Placeholders/            # 占位像素图（Tools/generate_placeholder_art.py 生成）
+├── slime_config.tres             # 史莱姆数值
+└── shake_*.tres                  # 震屏噪声参数
+Game/Art/Placeholders/            # 占位像素图（32×32，Tools/generate_placeholder_art.py 生成）
 Game/Scenes/
 ├── BaseCharacter.tscn            # 通用角色基座（场景继承）
-├── Player.tscn                   # 继承 + 玩家输入源 + 相机
+├── Player.tscn                   # 继承 + 玩家输入源 + Phantom Camera 相机
 ├── Slime.tscn                    # 继承 + AI 输入源 + 三根感知射线（collision_layer=2）
-└── TestLevel.tscn                # 主场景：平台、窄坑(16px)、宽坑(64px)、悬浮平台
+└── TestLevel.tscn                # 主场景：平台、窄坑(32px)、宽坑(128px)、悬浮平台
 Tools/
-└── generate_placeholder_art.py   # 占位像素图生成脚本（纯 zlib，无 PIL 依赖）
+├── generate_placeholder_art.py   # 占位像素图生成脚本（纯 zlib，无 PIL 依赖）
+└── headless_probe/               # 回归探针（8 项 PASS/FAIL）
 ```
 
 ## 操作方式
 
 - 移动：A/D 或 ←/→
 - 跳跃：空格 或 ↑（短按小跳、长按大跳）
+- 冲刺：Shift 或 X
+- 攻击：J 或 鼠标左键
 
 ## 验证记录（headless 运行）
+
+> **历史记录（16×16 时代的一次验证）**，坐标与坑宽均为旧尺度；当前验证基准是
+> `Tools/headless_probe`（8 项检查，见 architecture.md §7）。
 
 - 编译零错误零警告；运行零脚本错误。
 - 玩家落地静止 y=321（与地形几何吻合），状态推导正确。
@@ -123,6 +139,6 @@ Tools/
 
 ## 已知边界（后续可扩展）
 
-- 角色落入坑底会被底部接住（y=500），未实现重生逻辑。
-- 状态为推导式；将来加冲刺/二段跳/受击时再演进为显式状态机。
-- Motor 保持纯 C# 类，补 xUnit 测试时无需改动。
+- 状态机已落地（冲刺/攻击/受击/死亡 + 重生闭环）；本节其余为写作时的历史边界，
+  当前状态与扩展方式见 [architecture.md](architecture.md) §8/§9。
+- Motor 保持纯 C# 类，xUnit 测试已覆盖（Tests/UnitTests/，25 个）。

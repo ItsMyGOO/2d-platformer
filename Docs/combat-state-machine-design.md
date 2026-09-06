@@ -12,7 +12,9 @@
 - **行为状态与表现动画分离**：状态类报告 `CharacterVisualState`
   （idle/run/jump/fall/dash/attack/hurt/dead）；Grounded 内按 |vx| 细分 idle/run，
   Airborne 内按 vy 细分 jump/fall。动画永远与真实运动一致。
-- 原 `CharacterState` 枚举删除，由状态类 + VisualState 取代。
+- 原 `CharacterState` 枚举删除，由状态类 + VisualState 取代；
+  `CharacterState` 这一名称复用为状态抽象基类（`States/CharacterState.cs`），
+  定义 `Enter`/`Exit`/`Process`/`OnLanded` 与 `VisualState`。
 
 ## 2. 状态集合与切换规则
 
@@ -33,7 +35,7 @@
 ## 3. 冲刺（DashConfig，玩家配置）
 
 - 面朝方向水平冲刺；进入瞬间若 MoveAxis 非零则朝该方向（可反身冲刺）。
-- 速度 420 px/s、时长 0.18s、冷却 0.6s；期间重力关闭、vy 置 0。
+- 速度 840 px/s、时长 0.18s、冷却 0.6s（阶段④世界 ×2 后速度加倍，时长不变）；期间重力关闭、vy 置 0。
 - 结束保留部分水平速度（×0.4）衔接移动；无无敌帧。
 
 ## 4. 战斗闭环（Combat/ 子系统）
@@ -87,11 +89,12 @@
 - 新增 `MaxHP`、`InvincibilityTime`、`HurtStunTime`。
 - 玩家：HP5/有冲刺/有攻击；史莱姆：HP2/无冲刺/有攻击(伤害1)。
 
-## 8. 验证（headless 探针，验证后移除）
+## 8. 验证（持久 headless 探针）
 
-用 `Input.ActionPress/ActionRelease` 脚本化输入，逐项输出 PASS/FAIL：
-冲刺中攻击被拒、攻击中冲刺被拒、攻击中跳跃被拒、命中扣 HP+硬直、
-无敌帧拒绝重复伤害、死亡后敌人节点释放、AI 追击与攻击触发、巡逻回归。
+初版设计的「验证后移除」探针已在阶段②重建为持久工具 `Tools/headless_probe`，
+当前 8 项检查：玩家自然落地、跳跃高度、跳上平台、Slime 宽坑调头零落坑、窄坑穿越、
+追击中出招、命中玩家 HP 下降、（状态机互斥的单元级验证在 `Tests/UnitTests/`，25 个用例）。
+运行命令与阈值说明见 [architecture.md](architecture.md) §7。
 
 ## 9. 边界与非目标
 
