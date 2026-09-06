@@ -14,10 +14,18 @@ public partial class PlayerInputSource : InputSource
     [Export]
     private string _jumpAction = "jump";
 
+    [Export]
+    private string _dashAction = "dash";
+
+    [Export]
+    private string _attackAction = "attack";
+
     public override InputIntent Poll(float delta) =>
         InputIntent.Create(
             Input.GetAxis(_moveLeftAction, _moveRightAction),
             Input.IsActionJustPressed(_jumpAction),
-            Input.IsActionPressed(_jumpAction)
+            Input.IsActionPressed(_jumpAction),
+            Input.IsActionJustPressed(_dashAction),
+            Input.IsActionJustPressed(_attackAction)
         );
 }

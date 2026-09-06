@@ -1,10 +1,14 @@
-[gd_resource type="SpriteFrames" load_steps=6 format=3]
+[gd_resource type="SpriteFrames" load_steps=10 format=3]
 
 [ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_idle.png" id="1"]
 [ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_run1.png" id="2"]
 [ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_run2.png" id="3"]
 [ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_jump.png" id="4"]
 [ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_fall.png" id="5"]
+[ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_dash.png" id="6"]
+[ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_attack.png" id="7"]
+[ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_hurt.png" id="8"]
+[ext_resource type="Texture2D" path="res://Game/Art/Placeholders/player_death.png" id="9"]
 
 [resource]
 animations = [{
@@ -41,5 +45,37 @@ animations = [{
 }],
 "loop": true,
 "name": &"fall",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6")
+}],
+"loop": true,
+"name": &"dash",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8")
+}],
+"loop": true,
+"name": &"hurt",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9")
+}],
+"loop": true,
+"name": &"dead",
 "speed": 5.0
 }]

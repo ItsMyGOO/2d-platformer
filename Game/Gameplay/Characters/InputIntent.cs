@@ -17,11 +17,25 @@ public readonly struct InputIntent
     /// <summary>跳跃键当前是否被按住（用于可变跳跃高度）。</summary>
     public bool JumpHeld { get; init; }
 
-    public static InputIntent Create(float moveAxis, bool jumpPressed, bool jumpHeld) =>
+    /// <summary>本帧是否新按下了冲刺（脉冲信号）。</summary>
+    public bool DashPressed { get; init; }
+
+    /// <summary>本帧是否新按下了攻击（脉冲信号）。</summary>
+    public bool AttackPressed { get; init; }
+
+    public static InputIntent Create(
+        float moveAxis,
+        bool jumpPressed,
+        bool jumpHeld,
+        bool dashPressed = false,
+        bool attackPressed = false
+    ) =>
         new()
         {
             MoveAxis = Math.Clamp(moveAxis, -1f, 1f),
             JumpPressed = jumpPressed,
             JumpHeld = jumpHeld,
+            DashPressed = dashPressed,
+            AttackPressed = attackPressed,
         };
 }

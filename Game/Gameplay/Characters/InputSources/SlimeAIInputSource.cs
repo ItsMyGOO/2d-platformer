@@ -1,10 +1,13 @@
+using System;
 using Godot;
 
 namespace GodotGameTemplate.Gameplay.Characters.InputSources;
 
 /// <summary>
-/// 史莱姆 AI 输入：往返巡逻，撞墙或悬崖调头；
-/// 窄沟（远端探测线仍能探到地面）会起跳跳过，过宽的沟直接调头。
+/// 史莱姆 AI 输入：三层行为——巡逻（Patrol）、追击（Chase）、攻击（Attack）。
+/// 发现玩家（ChaseDetector）后转为追击：朝玩家移动，遇宽沟停下、遇墙跳；
+/// 水平距离进入攻击范围且冷却好时发攻击脉冲，原地出招。
+/// 玩家脱离视野回到巡逻（撞墙/悬崖调头，窄沟跳过、宽沟调头）。
 /// 只产出与玩家完全相同的意图，不触碰任何逻辑层细节。
 /// </summary>
 public partial class SlimeAIInputSource : InputSource
@@ -17,9 +20,13 @@ public partial class SlimeAIInputSource : InputSource
     [Export]
     private RayCast2D _ledgeNearRay;
 
-    /// <summary>远端崖沿探测：探得更远，用来区分「跳得过的窄沟」与「必须调头的宽沟」。</summary>
+    /// <summary>远端崖沿探测：探得更远，用来区分「跳得过的窄沟」与「必须停下的宽沟」。</summary>
     [Export]
     private RayCast2D _ledgeFarRay;
+
+    /// <summary>玩家视野探测器（约定名 ChaseDetector，mask=玩家实体层）。</summary>
+    [Export]
+    private Area2D _chaseDetector;
 
     /// <summary>初始巡逻方向：1 右，-1 左。</summary>
     [Export]
@@ -31,20 +38,31 @@ public partial class SlimeAIInputSource : InputSource
     [Export]
     private float _jumpCooldown = 0.8f;
 
+    /// <summary>与玩家的水平距离小于该值时原地出攻击（像素）。</summary>
+    [Export]
+    private float _attackDistance = 26f;
+
+    /// <summary>AI 侧攻击节奏（秒），应不小于角色攻击冷却。</summary>
+    [Export]
+    private float _attackInterval = 1.2f;
+
     private int _direction;
     private float _flipTimer;
     private float _jumpTimer;
+    private float _attackTimer;
     private bool _jumpPulse;
     private bool _grounded;
+    private Node2D _target;
 
     public override void _Ready()
     {
         _direction = _initialDirection >= 0 ? 1 : -1;
-        // 探测线默认按约定名在同级节点中发现（C# Node 导出无法解析前向 NodePath）。
+        // 节点引用按约定名在同级节点中发现（C# Node 导出无法解析前向 NodePath）。
         Node parent = GetParent();
         _wallRay ??= parent?.GetNodeOrNull<RayCast2D>("WallRay");
         _ledgeNearRay ??= parent?.GetNodeOrNull<RayCast2D>("LedgeNearRay");
         _ledgeFarRay ??= parent?.GetNodeOrNull<RayCast2D>("LedgeFarRay");
+        _chaseDetector ??= parent?.GetNodeOrNull<Area2D>("ChaseDetector");
     }
 
     public override void NotifyGrounded(bool grounded) => _grounded = grounded;
@@ -53,7 +71,18 @@ public partial class SlimeAIInputSource : InputSource
     {
         _flipTimer -= delta;
         _jumpTimer -= delta;
+        _attackTimer -= delta;
 
+        _target = FindTarget();
+        InputIntent intent =
+            _target != null && IsInstanceValid(_target) ? ChaseIntent(delta) : PatrolIntent(delta);
+        _jumpPulse = false;
+        return intent;
+    }
+
+    /// <summary>巡逻：撞墙/悬崖调头，窄沟跳过、宽沟调头。</summary>
+    private InputIntent PatrolIntent(float delta)
+    {
         if (_grounded && _flipTimer <= 0f)
         {
             AimRays();
@@ -77,10 +106,73 @@ public partial class SlimeAIInputSource : InputSource
                 }
             }
         }
+        return InputIntent.Create(_direction, _jumpPulse, jumpHeld: true);
+    }
 
-        InputIntent intent = InputIntent.Create(_direction, _jumpPulse, jumpHeld: true);
-        _jumpPulse = false;
-        return intent;
+    /// <summary>追击：朝玩家移动；宽沟前停下、遇墙跳；进入攻击距离原地出招。</summary>
+    private InputIntent ChaseIntent(float delta)
+    {
+        float dx = _target.GlobalPosition.X - ((Node2D)GetParent()).GlobalPosition.X;
+        int toward = MathF.Sign(dx);
+        if (toward != 0)
+        {
+            _direction = toward;
+        }
+        bool inAttackRange = MathF.Abs(dx) <= _attackDistance;
+
+        bool jumpPulse = false;
+        if (_grounded && !inAttackRange)
+        {
+            AimRays();
+            bool wallAhead = _wallRay != null && _wallRay.IsColliding();
+            bool gapAhead = _ledgeNearRay != null && !_ledgeNearRay.IsColliding();
+            if (wallAhead && _jumpTimer <= 0f)
+            {
+                jumpPulse = true;
+                _jumpTimer = _jumpCooldown;
+            }
+            else if (gapAhead)
+            {
+                if (IsGapTooWide())
+                {
+                    return InputIntent.Create(0f, false, jumpHeld: true); // 宽沟：停下对峙
+                }
+                if (_jumpTimer <= 0f)
+                {
+                    jumpPulse = true;
+                    _jumpTimer = _jumpCooldown;
+                }
+            }
+        }
+
+        bool attackPulse = false;
+        if (inAttackRange && _attackTimer <= 0f)
+        {
+            attackPulse = true;
+            _attackTimer = _attackInterval;
+        }
+        return InputIntent.Create(
+            inAttackRange ? 0f : _direction,
+            jumpPulse,
+            jumpHeld: true,
+            attackPressed: attackPulse
+        );
+    }
+
+    private Node2D FindTarget()
+    {
+        if (_chaseDetector == null)
+        {
+            return null;
+        }
+        foreach (Node2D body in _chaseDetector.GetOverlappingBodies())
+        {
+            if (body is Character && IsInstanceValid(body))
+            {
+                return body; // 探测器 mask 只含玩家实体层
+            }
+        }
+        return null;
     }
 
     private void Turn()

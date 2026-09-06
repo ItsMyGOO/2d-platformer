@@ -8,7 +8,7 @@
 [node name="Player" instance=ExtResource("1_base")]
 _config = ExtResource("3_cfg")
 
-[node name="Sprite" parent="." index="1"]
+[node name="Sprite" parent="Pivot" index="0"]
 sprite_frames = ExtResource("4_frames")
 
 [node name="Camera" type="Camera2D" parent="."]

@@ -1,17 +1,29 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/BaseCharacter.tscn" id="1_base"]
 [ext_resource type="Script" path="res://Game/Gameplay/Characters/InputSources/SlimeAIInputSource.cs" id="2_ai"]
 [ext_resource type="Resource" path="res://Game/Config/slime_config.tres" id="3_cfg"]
 [ext_resource type="SpriteFrames" path="res://Game/Art/Placeholders/slime_frames.tres" id="4_frames"]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_vision"]
+radius = 90.0
+
 [node name="Slime" instance=ExtResource("1_base")]
 collision_layer = 2
 collision_mask = 1
 _config = ExtResource("3_cfg")
 
-[node name="Sprite" parent="." index="1"]
+[node name="Sprite" parent="Pivot" index="0"]
 sprite_frames = ExtResource("4_frames")
+
+[node name="Hitbox" parent="Pivot" index="1"]
+collision_mask = 3
+
+[node name="HitShape" parent="Pivot/Hitbox" index="0"]
+position = Vector2(10, 0)
+
+[node name="Hurtbox" parent="Pivot" index="2"]
+collision_layer = 4
 
 [node name="WallRay" type="RayCast2D" parent="."]
 position = Vector2(0, -1)
@@ -24,6 +36,14 @@ target_position = Vector2(8, 10)
 [node name="LedgeFarRay" type="RayCast2D" parent="."]
 position = Vector2(2, 6)
 target_position = Vector2(30, 10)
+
+[node name="ChaseDetector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+
+[node name="VisionShape" type="CollisionShape2D" parent="ChaseDetector"]
+shape = SubResource("CircleShape2D_vision")
 
 [node name="AIInput" type="Node" parent="."]
 script = ExtResource("2_ai")

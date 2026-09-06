@@ -19,6 +19,7 @@ PALETTE = {
     "s": (157, 78, 219, 255), # slime body (purple)
     "d": (74, 20, 140, 255),  # slime outline (dark purple)
     "t": (214, 202, 174, 255),# dust
+    "r": (226, 84, 84, 255),  # hurt tint (red)
 }
 
 PLAYER_IDLE = [
@@ -116,6 +117,82 @@ PLAYER_FALL = [
     "................",
 ]
 
+PLAYER_DASH = [
+    "................",
+    "................",
+    "................",
+    "................",
+    ".....oooooo.....",
+    "....oggggggo....",
+    "....ogkggkgo....",
+    "...oggggggggo...",
+    "...oggggggggo...",
+    "..goggggggggo...",
+    ".ggogggggggo....",
+    "....oggggo......",
+    "....oggggo......",
+    "....ogg.go......",
+    "...oggo.ggo.....",
+    "..gg.....gg.....",
+]
+
+PLAYER_ATTACK = [
+    "................",
+    "................",
+    "................",
+    "....oooooo......",
+    "...oggggggo.....",
+    "...ogkggkgo.....",
+    "...oggggggo.....",
+    "..oggggggggggggo",
+    "..ogggggggggggo.",
+    "...oggggggo.....",
+    "....oggggo......",
+    "....oggggo......",
+    "....oggggo......",
+    "....og..go......",
+    "...ogg..ggo.....",
+    "................",
+]
+
+PLAYER_HURT = [
+    "................",
+    "................",
+    "................",
+    "....rrrrrr......",
+    "...orggggro.....",
+    "...okggggko.....",
+    "...oggggggo.....",
+    "..orggggggro....",
+    "..orggggggro....",
+    "..orrggggrro....",
+    "...orggggro.....",
+    "....orggro......",
+    "....orggro......",
+    "....or..ro......",
+    "...orr..rro.....",
+    "................",
+]
+
+PLAYER_DEATH = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "...oooooooooo...",
+    "..oggggggggggo..",
+    "..okkoooooooko..",
+]
+
 SLIME_IDLE = [
     "................",
     "................",
@@ -211,6 +288,63 @@ SLIME_FALL = [
     "................",
 ]
 
+SLIME_ATTACK = [
+    "................",
+    "................",
+    "................",
+    ".....dddddd.....",
+    "....dssssssd....",
+    "...dssssssssd...",
+    "...dssssssssd...",
+    "..dsswwsswwssd..",
+    "..dsswksswkssd..",
+    ".dssssssssssssd.",
+    ".dssssssssssssd.",
+    ".dssssssssssssd.",
+    "dsswwsssswwssssd",
+    "dssssssssssssssd",
+    "dddddddddddddddd",
+    "................",
+]
+
+SLIME_HURT = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    ".....dddddd.....",
+    "....drssssrd....",
+    "...drssssssrd...",
+    "..drswrssrwsrd..",
+    "..drswrssrwsrd..",
+    ".drssssssssssrd.",
+    ".drssssssssssrd.",
+    ".drrssssssssrrd.",
+    "drssssssssssssrd",
+    "dddddddddddddddd",
+    "................",
+]
+
+SLIME_DEATH = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "....dddddddd....",
+    "..ddssssssssdd..",
+    ".dssssssssssssd.",
+    "dddddddddddddddd",
+]
+
 DUST = [
     "tttt",
     "tttt",
@@ -251,11 +385,18 @@ def main():
         "player_run2.png": PLAYER_RUN2,
         "player_jump.png": PLAYER_JUMP,
         "player_fall.png": PLAYER_FALL,
+        "player_dash.png": PLAYER_DASH,
+        "player_attack.png": PLAYER_ATTACK,
+        "player_hurt.png": PLAYER_HURT,
+        "player_death.png": PLAYER_DEATH,
         "slime_idle.png": SLIME_IDLE,
         "slime_run1.png": SLIME_RUN1,
         "slime_run2.png": SLIME_RUN2,
         "slime_jump.png": SLIME_JUMP,
         "slime_fall.png": SLIME_FALL,
+        "slime_attack.png": SLIME_ATTACK,
+        "slime_hurt.png": SLIME_HURT,
+        "slime_death.png": SLIME_DEATH,
         "dust.png": DUST,
     }
     for name, rows in images.items():

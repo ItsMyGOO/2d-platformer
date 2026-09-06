@@ -4,7 +4,7 @@ namespace GodotGameTemplate.Gameplay.Characters;
 
 /// <summary>
 /// 逻辑层全部数值参数。玩家与敌人各持一份配置资源，
-/// 二者共用同一套 CharacterMotor 代码，仅数值不同。
+/// 二者共用同一套状态机代码，仅数值与能力（Dash/Attack 为 null 即无此能力）不同。
 /// </summary>
 public partial class CharacterConfig : Resource
 {
@@ -43,4 +43,24 @@ public partial class CharacterConfig : Resource
     /// <summary>最大下落速度（像素/秒）。</summary>
     [Export]
     public float MaxFallSpeed { get; set; } = 520f;
+
+    /// <summary>最大生命值。</summary>
+    [Export]
+    public int MaxHP { get; set; } = 5;
+
+    /// <summary>受击后无敌帧时长（秒）。</summary>
+    [Export]
+    public float InvincibilityTime { get; set; } = 0.8f;
+
+    /// <summary>受击硬直时长（秒）。</summary>
+    [Export]
+    public float HurtStunTime { get; set; } = 0.3f;
+
+    /// <summary>冲刺能力配置；null 表示不具备冲刺。</summary>
+    [Export]
+    public DashConfig Dash { get; set; }
+
+    /// <summary>攻击能力配置；null 表示不具备攻击。</summary>
+    [Export]
+    public AttackConfig Attack { get; set; }
 }
