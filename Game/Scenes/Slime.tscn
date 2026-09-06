@@ -6,7 +6,7 @@
 [ext_resource type="SpriteFrames" path="res://Game/Art/Placeholders/slime_frames.tres" id="4_frames"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_vision"]
-radius = 90.0
+radius = 180.0
 
 [node name="Slime" instance=ExtResource("1_base")]
 collision_layer = 2
@@ -20,22 +20,22 @@ sprite_frames = ExtResource("4_frames")
 collision_mask = 3
 
 [node name="HitShape" parent="Pivot/Hitbox" index="0"]
-position = Vector2(10, 0)
+position = Vector2(20, 0)
 
 [node name="Hurtbox" parent="Pivot" index="2"]
 collision_layer = 4
 
 [node name="WallRay" type="RayCast2D" parent="."]
-position = Vector2(0, -1)
-target_position = Vector2(14, 0)
+position = Vector2(0, -2)
+target_position = Vector2(28, 0)
 
 [node name="LedgeNearRay" type="RayCast2D" parent="."]
-position = Vector2(6, 6)
-target_position = Vector2(8, 10)
+position = Vector2(12, 12)
+target_position = Vector2(16, 20)
 
 [node name="LedgeFarRay" type="RayCast2D" parent="."]
-position = Vector2(2, 6)
-target_position = Vector2(30, 10)
+position = Vector2(4, 12)
+target_position = Vector2(60, 20)
 
 [node name="ChaseDetector" type="Area2D" parent="."]
 collision_layer = 0

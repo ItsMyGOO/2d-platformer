@@ -38,9 +38,13 @@ public partial class SlimeAIInputSource : InputSource
     [Export]
     private float _jumpCooldown = 0.8f;
 
-    /// <summary>与玩家的水平距离小于该值时原地出攻击（像素）。</summary>
+    /// <summary>
+    /// 与玩家的水平距离小于该值时原地出攻击（像素）。
+    /// 必须小于命中可达距离 48 = 命中盒偏移 20 + 命中盒半宽 14 + 玩家受击盒半宽 14，
+    /// 否则会停在射程外空挥（阶段④前 26 > 24 即僵持根因）。
+    /// </summary>
     [Export]
-    private float _attackDistance = 26f;
+    private float _attackDistance = 40f;
 
     /// <summary>AI 侧攻击节奏（秒），应不小于角色攻击冷却。</summary>
     [Export]
@@ -191,8 +195,8 @@ public partial class SlimeAIInputSource : InputSource
         {
             return true;
         }
-        _ledgeFarRay.Position = new Vector2(8f * _direction, 6f);
-        _ledgeFarRay.TargetPosition = new Vector2(26f * _direction, 10f);
+        _ledgeFarRay.Position = new Vector2(16f * _direction, 12f);
+        _ledgeFarRay.TargetPosition = new Vector2(52f * _direction, 20f);
         _ledgeFarRay.ForceRaycastUpdate();
         return !_ledgeFarRay.IsColliding();
     }
@@ -202,20 +206,20 @@ public partial class SlimeAIInputSource : InputSource
     {
         if (_wallRay != null)
         {
-            _wallRay.Position = new Vector2(0f, -1f);
-            _wallRay.TargetPosition = new Vector2(14f * _direction, 0f);
+            _wallRay.Position = new Vector2(0f, -2f);
+            _wallRay.TargetPosition = new Vector2(28f * _direction, 0f);
             _wallRay.ForceRaycastUpdate();
         }
         if (_ledgeNearRay != null)
         {
-            _ledgeNearRay.Position = new Vector2(6f * _direction, 6f);
-            _ledgeNearRay.TargetPosition = new Vector2(8f * _direction, 10f);
+            _ledgeNearRay.Position = new Vector2(12f * _direction, 12f);
+            _ledgeNearRay.TargetPosition = new Vector2(16f * _direction, 20f);
             _ledgeNearRay.ForceRaycastUpdate();
         }
         if (_ledgeFarRay != null)
         {
-            _ledgeFarRay.Position = new Vector2(2f * _direction, 6f);
-            _ledgeFarRay.TargetPosition = new Vector2(30f * _direction, 10f);
+            _ledgeFarRay.Position = new Vector2(4f * _direction, 12f);
+            _ledgeFarRay.TargetPosition = new Vector2(60f * _direction, 20f);
             _ledgeFarRay.ForceRaycastUpdate();
         }
     }
