@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/Player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://Game/Scenes/Slime.tscn" id="2_slime"]
+[ext_resource type="Script" path="res://Game/Gameplay/World/KillZone.cs" id="3_kill"]
 
 [sub_resource type="RectangleShape2D" id="ground_a"]
 size = Vector2(512, 64)
@@ -20,6 +21,9 @@ size = Vector2(32, 1600)
 
 [sub_resource type="RectangleShape2D" id="catcher"]
 size = Vector2(1280, 32)
+
+[sub_resource type="RectangleShape2D" id="killzone"]
+size = Vector2(1600, 64)
 
 [node name="TestLevel" type="Node2D"]
 
@@ -125,6 +129,15 @@ position = Vector2(640, 1000)
 
 [node name="Shape" type="CollisionShape2D" parent="PitFloor"]
 shape = SubResource("catcher")
+
+[node name="KillZone" type="Area2D" parent="."]
+position = Vector2(640, 960)
+collision_layer = 0
+collision_mask = 3
+script = ExtResource("3_kill")
+
+[node name="Shape" type="CollisionShape2D" parent="KillZone"]
+shape = SubResource("killzone")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 position = Vector2(128, 640)

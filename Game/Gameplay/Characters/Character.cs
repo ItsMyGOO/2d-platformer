@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using GodotGameTemplate.Gameplay.Characters.Combat;
 using GodotGameTemplate.Gameplay.Characters.InputSources;
@@ -28,6 +29,9 @@ public partial class Character : CharacterBody2D
 
     /// <summary>生命组件；受击入口是 <see cref="OnHurt"/>，外部不得直接改血量。</summary>
     public Health Health { get; private set; }
+
+    /// <summary>重生完成时触发（表现层订阅，如相机瞬移到出生点）。</summary>
+    public event Action Respawned;
 
     private Hitbox _hitbox;
     private Hurtbox _hurtbox;
@@ -119,7 +123,19 @@ public partial class Character : CharacterBody2D
         return true;
     }
 
-    private void OnDied()
+    /// <summary>环境即死（落坑等）：不经过血量，直接进入死亡流程。重复调用安全。</summary>
+    public void KillInstantly()
+    {
+        if (Motor.VisualState == CharacterVisualState.Dead)
+        {
+            return;
+        }
+        DieAndSchedule();
+    }
+
+    private void OnDied() => DieAndSchedule();
+
+    private void DieAndSchedule()
     {
         Motor.Kill();
         _hitbox?.SetActive(false);
@@ -132,5 +148,6 @@ public partial class Character : CharacterBody2D
         Velocity = Vector2.Zero;
         Health.RestoreFull();
         Motor.Reset();
+        Respawned?.Invoke();
     }
 }
