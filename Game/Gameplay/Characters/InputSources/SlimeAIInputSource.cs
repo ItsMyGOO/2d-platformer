@@ -56,7 +56,7 @@ public partial class SlimeAIInputSource : InputSource
     private float _attackTimer;
     private bool _jumpPulse;
     private bool _grounded;
-    private Node2D _target;
+    private Character _target;
 
     public override void _Ready()
     {
@@ -150,7 +150,9 @@ public partial class SlimeAIInputSource : InputSource
         }
 
         bool attackPulse = false;
-        if (inAttackRange && _attackTimer <= 0f)
+        // 玩家无敌帧期间不出招（打了也无效，白挥）；贴近等候无敌结束
+        bool targetVulnerable = _target is { Health.IsDead: false, Health.IsInvincible: false };
+        if (inAttackRange && targetVulnerable && _attackTimer <= 0f)
         {
             attackPulse = true;
             _attackTimer = _attackInterval;
@@ -163,7 +165,7 @@ public partial class SlimeAIInputSource : InputSource
         );
     }
 
-    private Node2D FindTarget()
+    private Character FindTarget()
     {
         if (_chaseDetector == null)
         {
@@ -171,9 +173,9 @@ public partial class SlimeAIInputSource : InputSource
         }
         foreach (Node2D body in _chaseDetector.GetOverlappingBodies())
         {
-            if (body is Character && IsInstanceValid(body))
+            if (body is Character character && IsInstanceValid(character))
             {
-                return body; // 探测器 mask 只含玩家实体层
+                return character; // 探测器 mask 只含玩家实体层
             }
         }
         return null;
