@@ -4,133 +4,133 @@
 [ext_resource type="PackedScene" path="res://Game/Scenes/Slime.tscn" id="2_slime"]
 
 [sub_resource type="RectangleShape2D" id="ground_a"]
-size = Vector2(256, 32)
+size = Vector2(512, 64)
 
 [sub_resource type="RectangleShape2D" id="ground_b"]
-size = Vector2(224, 32)
+size = Vector2(448, 64)
 
 [sub_resource type="RectangleShape2D" id="ground_c"]
-size = Vector2(80, 32)
+size = Vector2(160, 64)
 
 [sub_resource type="RectangleShape2D" id="platform"]
-size = Vector2(48, 16)
+size = Vector2(96, 32)
 
 [sub_resource type="RectangleShape2D" id="wall"]
-size = Vector2(16, 800)
+size = Vector2(32, 1600)
 
 [sub_resource type="RectangleShape2D" id="catcher"]
-size = Vector2(640, 16)
+size = Vector2(1280, 32)
 
 [node name="TestLevel" type="Node2D"]
 
 [node name="Sky" type="ColorRect" parent="."]
-offset_right = 640.0
-offset_bottom = 360.0
+offset_right = 1280.0
+offset_bottom = 720.0
 color = Color(0.55, 0.72, 0.85, 1)
 
 [node name="GroundA" type="StaticBody2D" parent="."]
-position = Vector2(128, 344)
+position = Vector2(256, 688)
 
 [node name="Shape" type="CollisionShape2D" parent="GroundA"]
 shape = SubResource("ground_a")
 
 [node name="Fill" type="ColorRect" parent="GroundA"]
-offset_left = -128.0
-offset_top = -16.0
-offset_right = 128.0
-offset_bottom = 16.0
+offset_left = -256.0
+offset_top = -32.0
+offset_right = 256.0
+offset_bottom = 32.0
 color = Color(0.43, 0.32, 0.24, 1)
 
 [node name="Top" type="ColorRect" parent="GroundA"]
-offset_left = -128.0
-offset_top = -16.0
-offset_right = 128.0
-offset_bottom = -12.0
+offset_left = -256.0
+offset_top = -32.0
+offset_right = 256.0
+offset_bottom = -24.0
 color = Color(0.36, 0.62, 0.33, 1)
 
 [node name="GroundB" type="StaticBody2D" parent="."]
-position = Vector2(384, 344)
+position = Vector2(768, 688)
 
 [node name="Shape" type="CollisionShape2D" parent="GroundB"]
 shape = SubResource("ground_b")
 
 [node name="Fill" type="ColorRect" parent="GroundB"]
-offset_left = -112.0
-offset_top = -16.0
-offset_right = 112.0
-offset_bottom = 16.0
+offset_left = -224.0
+offset_top = -32.0
+offset_right = 224.0
+offset_bottom = 32.0
 color = Color(0.43, 0.32, 0.24, 1)
 
 [node name="Top" type="ColorRect" parent="GroundB"]
-offset_left = -112.0
-offset_top = -16.0
-offset_right = 112.0
-offset_bottom = -12.0
+offset_left = -224.0
+offset_top = -32.0
+offset_right = 224.0
+offset_bottom = -24.0
 color = Color(0.36, 0.62, 0.33, 1)
 
 [node name="GroundC" type="StaticBody2D" parent="."]
-position = Vector2(600, 344)
+position = Vector2(1200, 688)
 
 [node name="Shape" type="CollisionShape2D" parent="GroundC"]
 shape = SubResource("ground_c")
 
 [node name="Fill" type="ColorRect" parent="GroundC"]
-offset_left = -40.0
-offset_top = -16.0
-offset_right = 40.0
-offset_bottom = 16.0
+offset_left = -80.0
+offset_top = -32.0
+offset_right = 80.0
+offset_bottom = 32.0
 color = Color(0.43, 0.32, 0.24, 1)
 
 [node name="Top" type="ColorRect" parent="GroundC"]
-offset_left = -40.0
-offset_top = -16.0
-offset_right = 40.0
-offset_bottom = -12.0
+offset_left = -80.0
+offset_top = -32.0
+offset_right = 80.0
+offset_bottom = -24.0
 color = Color(0.36, 0.62, 0.33, 1)
 
 [node name="Platform" type="StaticBody2D" parent="."]
-position = Vector2(152, 288)
+position = Vector2(304, 576)
 
 [node name="Shape" type="CollisionShape2D" parent="Platform"]
 shape = SubResource("platform")
 
 [node name="Fill" type="ColorRect" parent="Platform"]
-offset_left = -24.0
-offset_top = -8.0
-offset_right = 24.0
-offset_bottom = 8.0
+offset_left = -48.0
+offset_top = -16.0
+offset_right = 48.0
+offset_bottom = 16.0
 color = Color(0.52, 0.44, 0.36, 1)
 
 [node name="Top" type="ColorRect" parent="Platform"]
-offset_left = -24.0
-offset_top = -8.0
-offset_right = 24.0
-offset_bottom = -5.0
+offset_left = -48.0
+offset_top = -16.0
+offset_right = 48.0
+offset_bottom = -10.0
 color = Color(0.65, 0.56, 0.46, 1)
 
 [node name="WallLeft" type="StaticBody2D" parent="."]
-position = Vector2(-8, 180)
+position = Vector2(-16, 360)
 
 [node name="Shape" type="CollisionShape2D" parent="WallLeft"]
 shape = SubResource("wall")
 
 [node name="WallRight" type="StaticBody2D" parent="."]
-position = Vector2(648, 180)
+position = Vector2(1296, 360)
 
 [node name="Shape" type="CollisionShape2D" parent="WallRight"]
 shape = SubResource("wall")
 
 [node name="PitFloor" type="StaticBody2D" parent="."]
-position = Vector2(320, 500)
+position = Vector2(640, 1000)
 
 [node name="Shape" type="CollisionShape2D" parent="PitFloor"]
 shape = SubResource("catcher")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
-position = Vector2(64, 320)
+position = Vector2(128, 640)
 
 [node name="Slime1" parent="." instance=ExtResource("2_slime")]
-position = Vector2(340, 320)
+position = Vector2(680, 640)
 
 [node name="Slime2" parent="." instance=ExtResource("2_slime")]
-position = Vector2(430, 320)
+position = Vector2(860, 640)
