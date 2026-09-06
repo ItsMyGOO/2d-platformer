@@ -23,18 +23,26 @@ public partial class CharacterPresenter : Node
 
     private CharacterMotor _motor;
     private Health _health;
+    private Character _character;
+    private CpuParticles2D _deathBurst;
 
     /// <summary>由编排者在逻辑层创建后调用，绑定引用并订阅运动事件。</summary>
     public void Bind(CharacterMotor motor, Health health)
     {
         _sprite ??= GetParent().FindDescendant<AnimatedSprite2D>();
-        _dustParticles ??= GetParent().FindDescendant<CpuParticles2D>();
+        _dustParticles ??= GetParent().GetNodeOrNull<CpuParticles2D>("Dust");
         _pivot ??= GetParent().GetNodeOrNull<Node2D>("Pivot");
+        _deathBurst ??= GetParent().GetNodeOrNull<CpuParticles2D>("DeathBurst");
         Unbind();
         _motor = motor;
         _health = health;
+        _character = GetParent() as Character;
         _motor.Jumped += OnJumped;
         _motor.Landed += OnLanded;
+        if (_character != null)
+        {
+            _character.Died += OnCharacterDied;
+        }
     }
 
     private void Unbind()
@@ -45,9 +53,17 @@ public partial class CharacterPresenter : Node
         }
         _motor.Jumped -= OnJumped;
         _motor.Landed -= OnLanded;
+        if (_character != null)
+        {
+            _character.Died -= OnCharacterDied;
+        }
         _motor = null;
         _health = null;
+        _character = null;
     }
+
+    /// <summary>死亡瞬间播放粒子爆发（尸体动画照常播放，由死亡调度控制消失时机）。</summary>
+    private void OnCharacterDied() => _deathBurst?.Restart();
 
     public override void _ExitTree() => Unbind();
 
