@@ -1,83 +1,63 @@
-# godot-game-template v1.0
+# 2D Platformer
 
-一个用于创建新游戏项目的 **Godot 4 + C#** 极简 GitHub 模板仓库。
+Godot 4.6 + C#（net8.0）的 2D 横板平台跳跃，按「工程质量优先」路线建设：
+输入 → 意图 → 逻辑 → 表现 四层架构，玩家与敌人（史莱姆 AI）共用同一套状态机，
+单元测试 + headless 探针 + CI 守护回归。架构入口见 [Docs/architecture.md](Docs/architecture.md)。
 
-本仓库是一个模板，而非游戏玩法库。它的设计范围仅限于项目结构、Git 默认配置、文档以及基础的 Godot 项目文件。
+## 玩法与操作
 
-## 目录结构
+| 操作 | 按键 |
+|---|---|
+| 移动 | A/D 或 ←/→ |
+| 跳跃 | 空格 或 ↑（短按小跳、长按大跳） |
+| 冲刺 | Shift 或 X |
+| 攻击 | J 或 鼠标左键 |
 
-```text
-Game/
-├── Gameplay/
-├── UI/
-├── Scenes/
-├── Config/
-├── Art/
-└── Audio/
-Docs/
-Tests/
-addons/
+击中敌人会触发相机命中震屏（参数见 `Docs/camera-design.md`，可调可关）。
+
+## 环境要求
+
+- .NET SDK 8.0
+- Godot 4.6.1 **.NET/mono** 版（本项目用 `D:\Godot_v4.6.1-stable_mono_win64\...`，路径可按需调整）
+- Git Bash / PowerShell 均可
+
+## 快速开始
+
+```bash
+dotnet build                 # 构建（零 Error 才可提交）
+dotnet test                  # 25 个单元测试（纯 C#，无场景依赖）
 ```
 
-以上就是完整的模板目录设计。
+用 Godot 打开项目直接 F5 运行（主场景 `Game/Scenes/TestLevel.tscn`）。
 
-## 各目录用途
+## 回归探针
 
-- `Game/Gameplay/`：存放下游项目中与游戏玩法相关的代码和资源。
-- `Game/UI/`：存放下游项目中与 UI 相关的场景、脚本和资源。
-- `Game/Scenes/`：存放下游项目中的游戏场景。
-- `Game/Config/`：存放下游项目中的配置资源。
-- `Game/Art/`：存放下游项目中的视觉美术资源。
-- `Game/Audio/`：存放下游项目中的音频资源。
-- `Docs/`：项目文档。
-- `Tests/`：项目测试。
-- `addons/`：Godot 插件。
+headless 探针脚本化驱动输入，8 项检查逐条输出 PASS/FAIL（跳跃高度、跳上平台、
+窄坑穿越、宽坑调头、追击出招、命中扣血等），全过退出码 0：
 
-## 模板边界
-
-请勿向本仓库添加演示内容、示例玩法、可复用系统或示例游戏实体。
-
-请基于此模板创建新的游戏仓库，然后在新仓库中添加实际的游戏内容。
-
----
-
-# godot-game-template v1.0 (English)
-
-A minimal **Godot 4 + C#** GitHub Template Repository for creating new game projects.
-
-This repository is a template, not a gameplay library. It intentionally stops at project structure, Git defaults, documentation, and basic Godot project files.
-
-## Directory Layout
-
-```text
-Game/
-├── Gameplay/
-├── UI/
-├── Scenes/
-├── Config/
-├── Art/
-└── Audio/
-Docs/
-Tests/
-addons/
+```bash
+dotnet build
+"D:\Godot_v4.6.1-stable_mono_win64\Godot_v4.6.1-stable_mono_win64_console.exe" \
+    --headless --path . Tools/headless_probe/Probe.tscn
 ```
 
-That is the complete template directory design.
+行为改动（数值、场景几何、AI、战斗）提交前必须跑一遍。
 
-## What Belongs Here
+## CI
 
-- `Game/Gameplay/`: game-specific gameplay code and assets in downstream projects.
-- `Game/UI/`: game-specific UI scenes, scripts, and assets in downstream projects.
-- `Game/Scenes/`: game-specific scenes in downstream projects.
-- `Game/Config/`: game-specific configuration resources in downstream projects.
-- `Game/Art/`: game-specific visual assets in downstream projects.
-- `Game/Audio/`: game-specific audio assets in downstream projects.
-- `Docs/`: project documentation.
-- `Tests/`: project tests.
-- `addons/`: Godot plugins.
+GitHub Actions 两个 job：`format-check`（CSharpier 检查）+ `build-and-test`（Release 构建 + 单测）。
+提交前本地跑 `dotnet csharpier format .` + `dotnet csharpier check .`（规范见 [Docs/code-standards.md](Docs/code-standards.md)）。
 
-## Template Boundaries
+## 文档
 
-Do not add demo content, sample gameplay, reusable systems, or example game entities to this repository.
+| 文档 | 内容 |
+|---|---|
+| [Docs/architecture.md](Docs/architecture.md) | 架构总览 + 新增敌人/状态扩展指南（入口） |
+| [Docs/character-controller-design.md](Docs/character-controller-design.md) | 角色控制器四层设计 |
+| [Docs/combat-state-machine-design.md](Docs/combat-state-machine-design.md) | 战斗状态机与战斗闭环 |
+| [Docs/camera-design.md](Docs/camera-design.md) | 相机跟随与震屏 |
+| [Docs/code-standards.md](Docs/code-standards.md) | 代码规范与提交约定 |
+| [Docs/engineering-roadmap.md](Docs/engineering-roadmap.md) | 工程路线图（六阶段已收官，下一期候选见 §5） |
 
-Create new game repositories from this template, then add the actual game content in the new repository.
+工程履历：阶段⓪-⑥（资源补齐 → 代码规范 → 测试基建 → CI → 32×32 美术与世界 ×2 →
+Phantom Camera 相机与震屏 → 文档收尾）已全部完成，各阶段实施计划在 `Docs/plans/`。
