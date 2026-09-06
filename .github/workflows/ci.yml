@@ -16,7 +16,7 @@ jobs:
       - name: 还原工具
         run: dotnet tool restore
       - name: 检查代码格式
-        run: dotnet csharpier . --check
+        run: dotnet csharpier check .
 
   build-and-test:
     runs-on: ubuntu-latest

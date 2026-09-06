@@ -39,7 +39,7 @@
 
 ## 5. 格式化与提交
 
-- 格式化由 CSharpier 强制（`dotnet csharpier .`），提交前跑 `dotnet csharpier . --check`。
+- 格式化由 CSharpier 强制（`dotnet csharpier format .`），提交前跑 `dotnet csharpier check .`。
   `addons/` 内的第三方代码已通过 `.csharpierignore` 排除，不参与格式化。
 - 提交信息用中文祈使句，前缀 type：`feat:` / `fix:` / `style:` / `refactor:` / `test:` /
   `docs:` / `chore:`。格式化提交独立成 commit，不与功能改动混合。
