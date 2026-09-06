@@ -151,6 +151,9 @@ public partial class Character : CharacterBody2D
         _deathCountdown = DeathDuration;
     }
 
+    /// <summary>更新重生点（世界流式下由房间管理器在跨格时调用；默认为初始出生点）。</summary>
+    public void SetSpawnPoint(Vector2 globalPosition) => _spawnPosition = globalPosition;
+
     private void Respawn()
     {
         GlobalPosition = _spawnPosition;
