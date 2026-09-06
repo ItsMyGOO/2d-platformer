@@ -167,6 +167,9 @@ PhantomCamera2D 的阻尼语义与 Camera2D `position_smoothing_speed` 不等价
 
 ## 5. 本期非目标与下一期候选
 
+> 2026-09-06 起，后续功能与挂账统一维护在 **[Docs/backlog.md](backlog.md)**（单一事实源）；
+> 本节保留历史评审记录。
+
 UI/HUD/血条/菜单/暂停、音频、存档、TileMap 正式关卡、GdUnit4 集成测试、
 新敌人种类、连击/蓄力/弹体、本地化、正式美术资源。
 
