@@ -23,8 +23,10 @@ public partial class Character : CharacterBody2D
 
     private ScreenShake _screenShake;
 
+    /// <summary>逻辑层宿主：编排者内部驱动，表现层与探针只读。</summary>
     public CharacterMotor Motor { get; private set; }
 
+    /// <summary>生命组件；受击入口是 <see cref="OnHurt"/>，外部不得直接改血量。</summary>
     public Health Health { get; private set; }
 
     private Hitbox _hitbox;

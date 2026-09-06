@@ -20,6 +20,7 @@ public partial class Hurtbox : Area2D
     /// <summary>由编排者显式绑定所属角色（比祖先链查找更明确）。</summary>
     public void Bind(Character character) => _character = character;
 
+    /// <summary>被 Hitbox 命中的入口：转发给所属角色走伤害结算。</summary>
     public void ReceiveHit(DamageInfo info) => _character?.OnHurt(info);
 
     private Character FindOwnerCharacter()

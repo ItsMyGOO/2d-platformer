@@ -10,6 +10,7 @@ namespace GodotGameTemplate.Gameplay.Characters;
 /// </summary>
 public partial class ScreenShake : Node
 {
+    /// <summary>震屏总开关；关闭后事件仍订阅但不触发噪声。</summary>
     [Export]
     public bool Enabled { get; set; } = true;
 

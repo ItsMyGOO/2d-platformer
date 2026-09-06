@@ -10,17 +10,22 @@ public class Health
     private readonly float _invincibilityTime;
     private float _invincibilityTimer;
 
+    /// <summary>最大生命值（构造后不变）。</summary>
     public int MaxHP { get; }
 
+    /// <summary>当前生命值，下限 0。</summary>
     public int CurrentHP { get; private set; }
 
+    /// <summary>处于受击无敌帧期间（期间 TryApplyDamage 被拒）。</summary>
     public bool IsInvincible => _invincibilityTimer > 0f;
 
+    /// <summary>是否已死亡（CurrentHP ≤ 0）；死亡为终态。</summary>
     public bool IsDead => CurrentHP <= 0;
 
     /// <summary>成功受伤时触发（死亡时只触发 Died）。</summary>
     public event Action<DamageInfo> Damaged;
 
+    /// <summary>致命一击时触发一次（该次不触发 Damaged）。</summary>
     public event Action Died;
 
     public Health(int maxHP, float invincibilityTime)

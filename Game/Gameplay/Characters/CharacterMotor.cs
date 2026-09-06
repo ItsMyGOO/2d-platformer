@@ -22,7 +22,10 @@ public class CharacterMotor
     private readonly HurtState _hurtState;
     private readonly DeadState _deadState;
 
+    /// <summary>起跳瞬间触发（表现层尘土、探针与测试计数）。</summary>
     public event Action Jumped;
+
+    /// <summary>由空中落地的瞬间触发（表现层尘土等订阅）。</summary>
     public event Action Landed;
 
     /// <summary>出招瞬间触发（表现层特效 / Hitbox 开新一轮挥击判定）。</summary>
@@ -31,21 +34,28 @@ public class CharacterMotor
     /// <summary>攻击判定窗口开/关。逻辑层不碰节点，由编排者订阅驱动 Hitbox。</summary>
     public event Action<bool> AttackActiveChanged;
 
+    /// <summary>运行态配置（只读）；编辑态 Resource 在 Character._Ready 经 ToData() 映射而来。</summary>
     public CharacterConfigData Config => _config;
 
+    /// <summary>当前速度：Process 内计算，PostPhysics 后被真实物理结果修正。</summary>
     public Vector2 Velocity { get; internal set; }
 
     /// <summary>面朝方向：1 右，-1 左。</summary>
     public int Facing { get; private set; } = 1;
 
+    /// <summary>当前行为状态（状态机路由的事实源）。</summary>
     public CharacterState CurrentState { get; private set; }
 
+    /// <summary>表现层动画枚举：由当前状态映射，永远与真实运动一致。</summary>
     public CharacterVisualState VisualState => CurrentState.VisualState;
 
+    /// <summary>最近一帧的地面事实（PostPhysics 回喂）。</summary>
     public bool IsOnFloor { get; private set; } = true;
 
+    /// <summary>距上次按下跳跃的时间（秒）；跳跃缓冲依据，长期未按为 TimerExpired。</summary>
     public float TimeSinceJumpPressed { get; private set; } = TimerExpired;
 
+    /// <summary>距上次离开地面的时间（秒）；土狼时间依据，在地面或已烧掉为 TimerExpired。</summary>
     public float TimeSinceLeftFloor { get; private set; } = TimerExpired;
 
     /// <summary>上一帧的跳跃键按住状态（供状态类做「松开」沿检测）。</summary>

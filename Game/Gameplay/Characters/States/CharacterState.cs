@@ -13,13 +13,16 @@ public abstract class CharacterState
 
     protected CharacterState(CharacterMotor motor) => Motor = motor;
 
+    /// <summary>切入该状态时调用一次（进场动作：清计时、定速度等）。</summary>
     public virtual void Enter() { }
 
+    /// <summary>切出该状态时调用一次（收尾：关判定等）。</summary>
     public virtual void Exit() { }
 
     /// <summary>推进本状态的行为逻辑，可修改 Motor.Velocity 并发起状态切换。</summary>
     public abstract void Process(in InputIntent intent, float delta, float gravity);
 
+    /// <summary>该状态对应的表现动画。</summary>
     public abstract CharacterVisualState VisualState { get; }
 
     /// <summary>PostPhysics 检测到「从空中落地」的那一帧回调。</summary>
