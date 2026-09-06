@@ -1,7 +1,7 @@
 # 相机与震屏设计
 
 > 阶段⑤引入 Phantom Camera（`addons/phantom_camera/`，0.11.0.3，GDScript 运行时 + C# 包装层）
-> 替换原生 Camera2D 的平滑跟随，并接通三处事件驱动震屏。本文记录节点结构、参数迁移与调整方法。
+> 替换原生 Camera2D 的平滑跟随，并接通两处事件驱动震屏（命中/受击）。本文记录节点结构、参数迁移与调整方法。
 
 ## 1. 节点结构（全部在 `Game/Scenes/Player.tscn`）
 
@@ -11,13 +11,13 @@ Player (CharacterBody2D, 继承 BaseCharacter.tscn)
 │   └── PhantomCameraHost (Node, phantom_camera_host.gd)   ← 宿主驱动这颗 Camera2D
 ├── PlayerPhantomCamera2D (Node2D, phantom_camera_2d.gd)   ← 相机逻辑载体
 │     follow_mode = SIMPLE(2), follow_target = ../Player
-├── AttackNoiseEmitter2D / HurtNoiseEmitter2D / LandNoiseEmitter2D
+├── AttackNoiseEmitter2D / HurtNoiseEmitter2D
 └── ScreenShake (Node, ScreenShake.cs)                     ← 事件→发射器接线
 ```
 
 - 插件启用写在 `project.godot`：`[editor_plugins]` 注册 plugin.cfg；
   `[autoload]` 的 `PhantomCameraManager` 由 `plugin.gd` 启用逻辑注入，与编辑器内启用等价。
-- **只有玩家有相机与震屏**；史莱姆复用 `BaseCharacter.tscn`，不含以上节点，落地/出招不会震屏。
+- **只有玩家有相机与震屏**；史莱姆复用 `BaseCharacter.tscn`，不含以上节点，其命中与受击不会震屏。
 
 ## 2. 与旧 Camera2D 的参数映射
 
@@ -39,7 +39,9 @@ Player (CharacterBody2D, 继承 BaseCharacter.tscn)
 |---|---|---|---|---|
 | `Hitbox.HitConfirmed`（攻击命中结算） | AttackNoiseEmitter2D | `Game/Config/shake_attack.tres` | 30 / 1.5 | 0.2s / 0.1s |
 | `Health.Damaged`（受击） | HurtNoiseEmitter2D | `Game/Config/shake_hurt.tres` | 50 / 1.0 | 0.3s / 0.15s |
-| `Motor.Landed`（落地） | LandNoiseEmitter2D | `Game/Config/shake_land.tres` | 15 / 2.0 | 0.12s / 0.08s |
+
+> 落地不震屏（`Motor.Landed` 未接线）：常规跳跃落地频繁触发，干扰大于反馈价值。
+> 若未来做重坠落等特殊落地，可按同一模式加回专用发射器。
 
 - **可调**：抖动幅度/频率在 `Game/Config/shake_*.tres`（amplitude 为像素，×2 世界尺度下
   默认值 10 偏小）；时长/衰减在 Player.tscn 发射器节点属性。

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cron8cg1dtss0"]
+[gd_scene load_steps=11 format=3 uid="uid://cron8cg1dtss0"]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/BaseCharacter.tscn" id="1_base"]
 [ext_resource type="Script" uid="uid://c5vokbij011wl" path="res://Game/Gameplay/Characters/InputSources/PlayerInputSource.cs" id="2_input"]
@@ -9,7 +9,6 @@
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_noise_emitter_2d.gd" id="7_emit"]
 [ext_resource type="Resource" path="res://Game/Config/shake_attack.tres" id="8_atk"]
 [ext_resource type="Resource" path="res://Game/Config/shake_hurt.tres" id="9_hurt"]
-[ext_resource type="Resource" path="res://Game/Config/shake_land.tres" id="10_land"]
 [ext_resource type="Script" path="res://Game/Gameplay/Characters/ScreenShake.cs" id="11_shake"]
 
 [node name="Player" unique_id=1613628459 instance=ExtResource("1_base")]
@@ -51,12 +50,6 @@ script = ExtResource("7_emit")
 noise = ExtResource("9_hurt")
 duration = 0.3
 decay_time = 0.15
-
-[node name="LandNoiseEmitter2D" type="Node2D" parent="."]
-script = ExtResource("7_emit")
-noise = ExtResource("10_land")
-duration = 0.12
-decay_time = 0.08
 
 [node name="ScreenShake" type="Node" parent="."]
 script = ExtResource("11_shake")
