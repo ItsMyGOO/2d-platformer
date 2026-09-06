@@ -6,7 +6,12 @@ namespace GodotGameTemplate.UnitTests;
 public class HealthTests
 {
     private static DamageInfo Hit(int damage = 1) =>
-        DamageInfo.Create(damage, knockbackHorizontal: 10f, knockbackVertical: 5f, sourceDirection: 1f);
+        DamageInfo.Create(
+            damage,
+            knockbackHorizontal: 10f,
+            knockbackVertical: 5f,
+            sourceDirection: 1f
+        );
 
     [Fact]
     public void TryApplyDamage_ReducesCurrentHp()

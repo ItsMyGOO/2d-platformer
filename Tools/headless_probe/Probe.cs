@@ -12,9 +12,9 @@ namespace GodotGameTemplate.Tools;
 /// </summary>
 public partial class Probe : Node
 {
-    private const int LandFrame = 90;     // 阶段一末帧：自然落地
+    private const int LandFrame = 90; // 阶段一末帧：自然落地
     private const int JumpEndFrame = 200; // 阶段二末帧：跳跃观察窗
-    private const int TotalFrames = 920;  // 阶段三末帧：史莱姆观察 ~12s
+    private const int TotalFrames = 920; // 阶段三末帧：史莱姆观察 ~12s
 
     private Character _player;
     private Character _slime1;
