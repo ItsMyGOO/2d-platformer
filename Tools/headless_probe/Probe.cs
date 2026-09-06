@@ -8,13 +8,27 @@ namespace GodotGameTemplate.Tools;
 /// headless 回归探针：脚本化驱动玩家输入并观察两只史莱姆，
 /// 逐项输出 PROBE [PASS/FAIL]，全过退出码 0，否则 1。
 /// 运行：$godot --headless --path . Tools/headless_probe/Probe.tscn
-/// 注意：跳跃高度阈值针对当前世界尺度，阶段④世界×2 后需同步更新。
+/// 阈值针对阶段④ ×2 后的世界尺度：地面站立中心 y≈642、平台顶 560（站立 y≈546）、
+/// 窄坑 [512,544]、宽坑 [992,1120]。
 /// </summary>
 public partial class Probe : Node
 {
     private const int LandFrame = 90; // 阶段一末帧：自然落地
-    private const int JumpEndFrame = 200; // 阶段二末帧：跳跃观察窗
-    private const int TotalFrames = 920; // 阶段三末帧：史莱姆观察 ~12s
+    private const int ManeuverEndFrame = 260; // 阶段二末帧：助跑跳平台机动窗
+    private const int TotalFrames = 1070; // 阶段三末帧：史莱姆观察 ~13.5s
+
+    // 机动窗按键帧（60fps 物理帧，理论推算值；相关 FAIL 时按实测输出微调）
+    private const int RunPressFrame = 91; // 开始向右助跑
+    private const int JumpPressFrame = 105; // 助跑 14 帧后满跳（不提前松键）
+    private const int JumpReleaseFrame = 125; // 已过最高点，松键不影响高度
+    private const int RunReleaseFrame = 165; // 落回地面前后停住，避免滑进窄坑
+
+    private const float MinJumpRise = 90f; // 满跳理论 ~111px；登平台需 96px
+    private const float PlatformTopY = 600f; // 站上平台判定线（介于 546 与地面 642 之间）
+    private const float PlatformMinX = 250f;
+    private const float PlatformMaxX = 360f;
+    private const float FellOffsetY = 50f; // 落到出生点下方 50px 视为落坑
+    private const float NarrowGapX = 512f; // 窄坑左沿，过线即穿坑
 
     private Character _player;
     private Character _slime1;
@@ -24,6 +38,9 @@ public partial class Probe : Node
     private float _playerRestY;
     private float _playerMinY = float.MaxValue;
     private float _slimeSpawnY;
+    private int _playerMinHP = int.MaxValue;
+    private int _slime1AttackCount;
+    private bool _playerWasOnPlatform;
     private bool _slime1CrossedNarrowGap;
     private bool _slime2Fell;
     private bool _slime1Fell;
@@ -36,6 +53,7 @@ public partial class Probe : Node
         _player = GetNode<Character>("TestLevel/Player");
         _slime1 = GetNode<Character>("TestLevel/Slime1");
         _slime2 = GetNode<Character>("TestLevel/Slime2");
+        _slime1.Motor.AttackStarted += () => _slime1AttackCount++;
         // 物理未运行，GlobalPosition 即场景出生点；用它做落坑判定基准
         // （不能用运行中的 y 采样：巡逻跳跃中的史莱姆会污染基准）
         _slimeSpawnY = _slime1.GlobalPosition.Y;
@@ -44,6 +62,7 @@ public partial class Probe : Node
     public override void _PhysicsProcess(double delta)
     {
         _frame++;
+        _playerMinHP = Mathf.Min(_playerMinHP, _player.Health.CurrentHP);
 
         if (_frame <= LandFrame)
         {
@@ -54,22 +73,35 @@ public partial class Probe : Node
             return;
         }
 
-        if (_frame <= JumpEndFrame)
+        if (_frame <= ManeuverEndFrame)
         {
-            if (_frame == LandFrame + 1)
+            if (_frame == RunPressFrame)
+            {
+                Input.ActionPress("move_right");
+            }
+            if (_frame == JumpPressFrame)
             {
                 Input.ActionPress("jump");
             }
-            if (_frame == LandFrame + 15)
+            if (_frame == JumpReleaseFrame)
             {
                 Input.ActionRelease("jump");
             }
+            if (_frame == RunReleaseFrame)
+            {
+                Input.ActionRelease("move_right");
+            }
             _playerMinY = Mathf.Min(_playerMinY, _player.GlobalPosition.Y);
+            _playerWasOnPlatform |=
+                _player.IsOnFloor()
+                && _player.GlobalPosition.Y < PlatformTopY
+                && _player.GlobalPosition.X > PlatformMinX
+                && _player.GlobalPosition.X < PlatformMaxX;
             return;
         }
 
-        // 阶段三：观察史莱姆（落到出生点下方 25px 视为落坑）
-        float fellY = _slimeSpawnY + 25f;
+        // 阶段三：观察史莱姆与战斗闭环
+        float fellY = _slimeSpawnY + FellOffsetY;
         if (!_slime2Fell && _slime2.GlobalPosition.Y > fellY)
         {
             _slime2Fell = true;
@@ -84,18 +116,21 @@ public partial class Probe : Node
                 $"[trip] frame={_frame} S1 首次越界 y={_slime1.GlobalPosition.Y:F1} x={_slime1.GlobalPosition.X:F1}"
             );
         }
-        _slime1CrossedNarrowGap |= _slime1.GlobalPosition.X < 256f;
+        _slime1CrossedNarrowGap |= _slime1.GlobalPosition.X < NarrowGapX;
 
         if (_frame == TotalFrames)
         {
             Check(_player.IsOnFloor(), "玩家自然落地");
             Check(
-                _playerRestY - _playerMinY >= 45f,
-                $"跳跃上升 {_playerRestY - _playerMinY:F1}px ≥ 45px"
+                _playerRestY - _playerMinY >= MinJumpRise,
+                $"跳跃上升 {_playerRestY - _playerMinY:F1}px ≥ {MinJumpRise:F0}px"
             );
+            Check(_playerWasOnPlatform, "玩家跳上 ×2 后平台");
             Check(!_slime2Fell, "Slime2 在观察期内未落入宽沟");
             Check(!_slime1Fell, "Slime1 在观察期内未落坑");
-            Check(_slime1CrossedNarrowGap, "Slime1 在观察期内穿过窄沟 (x<256)");
+            Check(_slime1CrossedNarrowGap, "Slime1 在观察期内穿过窄坑 (x<512)");
+            Check(_slime1AttackCount > 0, "Slime1 追击中出招");
+            Check(_playerMinHP < _player.Health.MaxHP, "史莱姆命中玩家（HP 曾下降）");
             Finish();
         }
     }
@@ -111,7 +146,7 @@ public partial class Probe : Node
 
     private void Finish()
     {
-        GD.Print($"PROBE SUMMARY {5 - _failures.Count}/5 通过");
+        GD.Print($"PROBE SUMMARY {8 - _failures.Count}/8 通过");
         GetTree().Quit(_failures.Count == 0 ? 0 : 1);
     }
 }
