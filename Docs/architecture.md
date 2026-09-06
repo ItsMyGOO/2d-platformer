@@ -173,7 +173,9 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
    - AI（照抄 Slime.tscn）：`AIInput` 节点挂 `SlimeAIInputSource.cs`；
      三个 `RayCast2D`（`WallRay` / `LedgeNearRay` / `LedgeFarRay`）与 `ChaseDetector`
      （Area2D，mask=1）+ `VisionShape`——节点名是约定名，不能改
-4. **入关**：在关卡场景里实例化 `YourEnemy.tscn`。
+4. **入关**：在关卡场景里实例化 `YourEnemy.tscn`。**出生点必须与地面齐平**
+   （角色中心 y = 地面顶 − 身体半高 14，如 TestLevel 的 642）：悬空出生会在物理沉降时
+   误触发一次落地事件（尘土/土狼计时被污染）。
 5. **验证**：`dotnet build` + 探针回归（§7）；编辑器里跑一圈观察巡逻/追击/攻击。
 6. **可选**：行为不同才需要新输入源——新写 `YourAIInputSource.cs` 继承 `InputSource`
    （只实现 `Poll(delta)` 产出 `InputIntent`，绝不直接操控角色），场景里替换 AIInput 节点脚本即可。

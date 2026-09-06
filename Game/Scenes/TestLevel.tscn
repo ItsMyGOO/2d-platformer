@@ -140,10 +140,10 @@ script = ExtResource("3_kill")
 shape = SubResource("killzone")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
-position = Vector2(128, 640)
+position = Vector2(128, 642)
 
 [node name="Slime1" parent="." instance=ExtResource("2_slime")]
-position = Vector2(680, 640)
+position = Vector2(680, 642)
 
 [node name="Slime2" parent="." instance=ExtResource("2_slime")]
-position = Vector2(860, 640)
+position = Vector2(860, 642)
