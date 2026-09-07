@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/Slime.tscn" id="1_slime"]
 [ext_resource type="Script" path="res://Game/Gameplay/World/KillZone.cs" id="2_kill"]
 [ext_resource type="PackedScene" path="res://Game/Scenes/Checkpoint.tscn" id="3_checkpoint"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/Shooter.tscn" id="4_shooter"]
 
 [sub_resource type="RectangleShape2D" id="ground"]
 size = Vector2(1280, 64)
@@ -109,6 +110,9 @@ position = Vector2(620, 642)
 
 [node name="Checkpoint" parent="." instance=ExtResource("3_checkpoint")]
 position = Vector2(360, 642)
+
+[node name="Shooter1" parent="." instance=ExtResource("4_shooter")]
+position = Vector2(980, 642)
 
 [node name="Spawn" type="Marker2D" parent="."]
 position = Vector2(128, 642)

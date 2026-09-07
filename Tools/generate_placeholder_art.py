@@ -24,6 +24,8 @@ PALETTE = {
     "t": (214, 202, 174, 255),# dust
     "r": (226, 84, 84, 255),  # hurt tint (red)
     "e": (150, 30, 40, 255),  # heart outline (dark red)
+    "y": (240, 200, 80, 255), # projectile (yellow)
+    "n": (160, 110, 20, 255), # projectile outline (dark yellow)
 }
 
 PLAYER_IDLE = [
@@ -375,6 +377,25 @@ HEART = [
     "................",
 ]
 
+PROJECTILE = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    ".....nnnnnn.....",
+    "...nnyyyyyynn...",
+    "..nyyyyyyyyyyn..",
+    "..nyyyywyyyyyn..",
+    "...nnyyyyyynn...",
+    ".....nnnnnn.....",
+    "................",
+    "................",
+    "................",
+]
+
 
 def scale2x(rows):
     """最近邻 ×2：每像素横向复制一次、每行纵向复制一次。"""
@@ -428,6 +449,7 @@ def main():
         "slime_death.png": SLIME_DEATH,
         "dust.png": DUST,
         "heart.png": HEART,
+        "projectile.png": PROJECTILE,
     }
     for name, rows in images.items():
         write_png(os.path.join(OUT, name), scale2x(rows))

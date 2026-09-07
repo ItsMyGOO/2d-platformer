@@ -38,6 +38,9 @@ public partial class Character : CharacterBody2D
     /// 表现层订阅做死亡反馈。血量明细仍看 Health.Died）。</summary>
     public event Action Died;
 
+    /// <summary>是否玩家（由输入源类型推导；弹体等子系统据此选择目标层）。</summary>
+    public bool IsPlayer => _isPlayer;
+
     private Hitbox _hitbox;
     private Hurtbox _hurtbox;
     private Vector2 _spawnPosition;
@@ -80,6 +83,7 @@ public partial class Character : CharacterBody2D
         _screenShake?.Bind(Health, _hitbox);
         _cameraRig = this.FindDescendant<CameraRig>();
         _cameraRig?.Bind(this);
+        this.FindDescendant<ProjectileEmitter>()?.Bind(this);
 
         _spawnPosition = GlobalPosition;
     }

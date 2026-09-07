@@ -1,45 +1,40 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/BaseCharacter.tscn" id="1_base"]
-[ext_resource type="Script" path="res://Game/Gameplay/Characters/InputSources/SlimeAIInputSource.cs" id="2_ai"]
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/InputSources/ShooterAIInputSource.cs" id="2_ai"]
 [ext_resource type="Resource" path="res://Game/Config/slime_config.tres" id="3_cfg"]
 [ext_resource type="SpriteFrames" path="res://Game/Art/Placeholders/slime_frames.tres" id="4_frames"]
 [ext_resource type="Script" path="res://Game/Gameplay/Characters/Combat/ContactDamager.cs" id="5_contact"]
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/Combat/ProjectileEmitter.cs" id="6_emitter"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/Projectile.tscn" id="7_projectile"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_vision"]
-radius = 180.0
+radius = 260.0
 
 [sub_resource type="RectangleShape2D" id="contact_shape"]
 size = Vector2(24, 28)
 
-[node name="Slime" instance=ExtResource("1_base")]
+[node name="Shooter" instance=ExtResource("1_base")]
 collision_layer = 2
 collision_mask = 1
 _config = ExtResource("3_cfg")
 
 [node name="Sprite" parent="Pivot" index="0"]
+modulate = Color(0.7, 0.85, 1, 1)
 sprite_frames = ExtResource("4_frames")
 
 [node name="Hitbox" parent="Pivot" index="1"]
 collision_mask = 4
 
-[node name="HitShape" parent="Pivot/Hitbox" index="0"]
-position = Vector2(20, 0)
-
 [node name="Hurtbox" parent="Pivot" index="2"]
 collision_layer = 8
 
-[node name="WallRay" type="RayCast2D" parent="."]
-position = Vector2(0, -2)
-target_position = Vector2(28, 0)
+[node name="ContactDamager" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
 
-[node name="LedgeNearRay" type="RayCast2D" parent="."]
-position = Vector2(12, 12)
-target_position = Vector2(16, 20)
-
-[node name="LedgeFarRay" type="RayCast2D" parent="."]
-position = Vector2(4, 12)
-target_position = Vector2(60, 20)
+[node name="Shape" type="CollisionShape2D" parent="ContactDamager"]
+shape = SubResource("contact_shape")
 
 [node name="ChaseDetector" type="Area2D" parent="."]
 collision_layer = 0
@@ -49,13 +44,9 @@ monitorable = false
 [node name="VisionShape" type="CollisionShape2D" parent="ChaseDetector"]
 shape = SubResource("CircleShape2D_vision")
 
-[node name="ContactDamager" type="Area2D" parent="."]
-collision_layer = 0
-collision_mask = 4
-script = ExtResource("5_contact")
-
-[node name="Shape" type="CollisionShape2D" parent="ContactDamager"]
-shape = SubResource("contact_shape")
-
 [node name="AIInput" type="Node" parent="."]
 script = ExtResource("2_ai")
+
+[node name="ProjectileEmitter" type="Node" parent="."]
+script = ExtResource("6_emitter")
+_projectileScene = ExtResource("7_projectile")
