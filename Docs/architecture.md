@@ -161,7 +161,8 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 
 ## 8. 扩展指南：新增一种敌人（约 1 小时）
 
-以史莱姆为参照（`Game/Scenes/Slime.tscn`）。全程不改 Motor/States/Character/Presenter——
+以史莱姆（`Game/Scenes/Slime.tscn`，近战接触+挥击）与射手（`Game/Scenes/Shooter.tscn`，
+站桩远程弹体）为参照。全程不改 Motor/States/Character——
 **输入源 + 数值配置 + 外观就是敌人之间的全部差异**。
 
 1. **数值**：复制 `Game/Config/slime_config.tres` → `your_enemy_config.tres`，编辑器里调数值
@@ -185,6 +186,9 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 5. **验证**：`dotnet build` + 探针回归（§7）；编辑器里跑一圈观察巡逻/追击/攻击。
 6. **可选**：行为不同才需要新输入源——新写 `YourAIInputSource.cs` 继承 `InputSource`
    （只实现 `Poll(delta)` 产出 `InputIntent`，绝不直接操控角色），场景里替换 AIInput 节点脚本即可。
+   远程敌人参照 Shooter：`ShooterAIInputSource`（视野内周期发攻击脉冲）+
+   `ProjectileEmitter`（订阅 AttackActiveChanged 在判定窗口开启瞬间朝面朝方向发射弹体）+
+   `Projectile.tscn`（直线弹体：命中受击盒结算、撞地形销毁、超时自毁）。
 
 ## 9. 扩展指南：新增一个状态
 

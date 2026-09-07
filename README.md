@@ -29,7 +29,7 @@ Godot 4.6 + C#（net8.0）的 2D 横板平台跳跃，按「工程质量优先�
 
 ```bash
 dotnet build                 # 构建（零 Error 才可提交）
-dotnet test                  # 28 个单元测试（纯 C#，无场景依赖）
+dotnet test                  # 32 个单元测试（纯 C#，无场景依赖）
 ```
 
 用 Godot 打开项目直接 F5 运行（主场景 `Game/Scenes/Main.tscn`：主菜单 → 开始游戏）。
