@@ -403,6 +403,54 @@ def scale2x(rows):
     return [row for row in doubled for _ in range(2)]
 
 
+def write_tileset_png(path):
+    """5 种 32×32 tile 横排为 160×32 图集：地形顶/地形填/墙/平台顶/平台身。
+
+    顶部 4px 为高亮条（草帽/台面），其余为填充；正式美术期仅替换此图集。
+    """
+    t_top, t_fill = (54, 120, 48, 255), (74, 46, 32, 255)
+    wall = (62, 58, 68, 255)
+    p_top, p_fill = (178, 152, 116, 255), (128, 104, 78, 255)
+
+    def lighter(c):
+        return (min(255, c[0] + 26), min(255, c[1] + 26), min(255, c[2] + 26), 255)
+
+    specs = [
+        (t_top, t_fill),          # 0 地形顶
+        (lighter(t_fill), t_fill),  # 1 地形填
+        (lighter(wall), wall),    # 2 墙
+        (p_top, p_fill),          # 3 平台顶
+        (lighter(p_fill), p_fill),  # 4 平台身
+    ]
+    tiles = [
+        [[top if y < 4 else fill for _ in range(32)] for y in range(32)]
+        for top, fill in specs
+    ]
+
+    height, width = 32, 32 * len(tiles)
+    raw = b""
+    for y in range(height):
+        raw += b"\x00"
+        for tile in tiles:
+            for x in range(32):
+                raw += bytes(tile[y][x])
+
+    def chunk(tag, data):
+        return (
+            struct.pack(">I", len(data))
+            + tag
+            + data
+            + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+        )
+
+    png = b"\x89PNG\r\n\x1a\n"
+    png += chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
+    png += chunk(b"IDAT", zlib.compress(raw))
+    png += chunk(b"IEND", b"")
+    with open(path, "wb") as f:
+        f.write(png)
+
+
 def write_png(path, rows):
     height = len(rows)
     width = len(rows[0])
@@ -453,7 +501,8 @@ def main():
     }
     for name, rows in images.items():
         write_png(os.path.join(OUT, name), scale2x(rows))
-    print(f"wrote {len(images)} PNGs to {OUT}")
+    write_tileset_png(os.path.join(OUT, "placeholder_tiles.png"))
+    print(f"wrote {len(images)} PNGs + tileset to {OUT}")
 
 
 if __name__ == "__main__":
