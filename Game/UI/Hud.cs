@@ -27,6 +27,7 @@ public partial class Hud : CanvasLayer
             GetNode<TextureRect>("Box/Heart5"),
         ];
         _deathOverlay = GetNode<Control>("DeathOverlay");
+        GetNode<Label>("DeathOverlay/Center/Label").Text = Tr("DEATH_TEXT");
         _dim = GetNode<ColorRect>("DeathOverlay/Dim");
     }
 

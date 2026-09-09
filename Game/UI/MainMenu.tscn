@@ -26,29 +26,24 @@ theme_override_constants/separation = 16
 [node name="Title" type="Label" parent="Center/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 48
-text = "2D PLATFORMER"
 horizontal_alignment = 1
 
 [node name="StartButton" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "开始游戏"
 
 [node name="ContinueButton" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "继续游戏"
 
 [node name="SettingsButton" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "设置"
 
 [node name="QuitButton" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "退出"

@@ -24,6 +24,15 @@ public partial class SettingsMenu : Control
         var fullscreen = GetNode<CheckButton>("Center/VBox/FullscreenCheck");
         var vsync = GetNode<CheckButton>("Center/VBox/VsyncCheck");
         var shake = GetNode<CheckButton>("Center/VBox/ScreenshakeCheck");
+        GetNode<Label>("Center/VBox/Title").Text = Tr("SETTINGS_TITLE");
+        GetNode<Label>("Center/VBox/DisplayHeader").Text = Tr("SETTINGS_DISPLAY");
+        fullscreen.Text = Tr("SETTINGS_FULLSCREEN");
+        vsync.Text = Tr("SETTINGS_VSYNC");
+        GetNode<Label>("Center/VBox/GameplayHeader").Text = Tr("SETTINGS_GAMEPLAY");
+        shake.Text = Tr("SETTINGS_SCREENSHAKE");
+        GetNode<Label>("Center/VBox/ActionsHeader").Text = Tr("SETTINGS_ACTIONS");
+        GetNode<Button>("Center/VBox/ResetDefaultsButton").Text = Tr("BTN_RESET_DEFAULTS");
+        GetNode<Button>("Center/VBox/BackButton").Text = Tr("BTN_BACK");
         fullscreen.ButtonPressed = SettingsService.Fullscreen;
         vsync.ButtonPressed = SettingsService.Vsync;
         shake.ButtonPressed = SettingsService.ScreenshakeEnabled;
@@ -99,6 +108,7 @@ public partial class SettingsMenu : Control
             };
             var button = new Button { CustomMinimumSize = new Vector2(120, 32) };
             button.Pressed += () => BeginCapture(action);
+            button.Text = OS.GetKeycodeString(InputRemapStore.CurrentKey(action));
             row.AddChild(label);
             row.AddChild(button);
             rows.AddChild(row);
@@ -109,7 +119,7 @@ public partial class SettingsMenu : Control
     private void BeginCapture(string action)
     {
         _capturingAction = action;
-        _bindButtons[action].Text = "按下新按键…";
+        _bindButtons[action].Text = Tr("BIND_CAPTURE");
     }
 
     private void RefreshBindButtons()

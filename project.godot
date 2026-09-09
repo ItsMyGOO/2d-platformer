@@ -94,6 +94,11 @@ pause={
 2d_physics/layer_4="enemy_hurtbox"
 2d_physics/layer_5="player_body"
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://translations/zh_CN.csv")
+locale/fallback_locale="zh_CN"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

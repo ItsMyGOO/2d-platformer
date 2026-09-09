@@ -17,6 +17,11 @@ public partial class MainMenu : Control
 
     public override void _Ready()
     {
+        GetNode<Label>("Center/VBox/Title").Text = Tr("GAME_TITLE");
+        GetNode<Button>("Center/VBox/StartButton").Text = Tr("MENU_START");
+        GetNode<Button>("Center/VBox/ContinueButton").Text = Tr("MENU_CONTINUE");
+        GetNode<Button>("Center/VBox/SettingsButton").Text = Tr("MENU_SETTINGS");
+        GetNode<Button>("Center/VBox/QuitButton").Text = Tr("MENU_QUIT");
         GetNode<Button>("Center/VBox/StartButton").Pressed += () => StartRequested?.Invoke();
         var continueButton = GetNode<Button>("Center/VBox/ContinueButton");
         continueButton.Pressed += () => ContinueRequested?.Invoke();

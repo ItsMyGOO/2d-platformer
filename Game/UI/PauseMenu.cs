@@ -14,6 +14,10 @@ public partial class PauseMenu : Control
 
     public override void _Ready()
     {
+        GetNode<Label>("Center/VBox/Title").Text = Tr("PAUSE_TITLE");
+        GetNode<Button>("Center/VBox/ResumeButton").Text = Tr("PAUSE_RESUME");
+        GetNode<Button>("Center/VBox/SettingsButton").Text = Tr("PAUSE_SETTINGS");
+        GetNode<Button>("Center/VBox/MainMenuButton").Text = Tr("PAUSE_MAINMENU");
         GetNode<Button>("Center/VBox/ResumeButton").Pressed += () => ResumeRequested?.Invoke();
         GetNode<Button>("Center/VBox/SettingsButton").Pressed += () => SettingsRequested?.Invoke();
         GetNode<Button>("Center/VBox/MainMenuButton").Pressed += () => MainMenuRequested?.Invoke();
