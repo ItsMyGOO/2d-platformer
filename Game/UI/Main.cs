@@ -1,6 +1,7 @@
 using System;
 using Godot;
 using GodotGameTemplate.Gameplay.Characters;
+using GodotGameTemplate.Persistence;
 
 namespace GodotGameTemplate.UI;
 
@@ -32,6 +33,7 @@ public partial class Main : Node
         _pauseMenu = GetNode<PauseMenu>("UiLayer/PauseMenu");
         _levelRoot = GetNode("LevelRoot");
         _mainMenu.StartRequested += StartGame;
+        _mainMenu.ContinueRequested += ContinueGame;
         _mainMenu.QuitRequested += () => GetTree().Quit();
         _pauseMenu.ResumeRequested += ResumeGame;
         _pauseMenu.MainMenuRequested += BackToMainMenu;
@@ -62,10 +64,25 @@ public partial class Main : Node
         _level.Name = "Level"; // 固定实例名，HUD 等按 LevelRoot/Level/Player 寻址
         _levelRoot.AddChild(_level);
         var player = _levelRoot.GetNode<Character>("Level/Player");
+        // 最近重生点自动存档：跨房/检查点更新重生点即写盘（M4 语义，Phase5 Task 1）
+        player.SpawnPointChanged += pos =>
+            SaveStore.Save(new SaveData { SpawnX = pos.X, SpawnY = pos.Y });
         _hud = GD.Load<PackedScene>("res://Game/UI/Hud.tscn").Instantiate<Hud>();
         GetNode("UiLayer").AddChild(_hud);
         _hud.Bind(player);
         _state = AppState.Playing;
+    }
+
+    /// <summary>继续游戏：先正常开局，再把玩家落到存档的重生点（满血由 Respawn 语义保证）。</summary>
+    private void ContinueGame()
+    {
+        StartGame();
+        if (SaveStore.TryLoad(out var save))
+        {
+            _levelRoot
+                .GetNode<Character>("Level/Player")
+                .PlaceAt(new Vector2(save.SpawnX, save.SpawnY));
+        }
     }
 
     private void PauseGame()

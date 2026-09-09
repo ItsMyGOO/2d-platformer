@@ -160,8 +160,23 @@ public partial class Character : CharacterBody2D
         _deathCountdown = DeathDuration;
     }
 
-    /// <summary>更新重生点（世界流式下由房间管理器在跨格时调用；默认为初始出生点）。</summary>
-    public void SetSpawnPoint(Vector2 globalPosition) => _spawnPosition = globalPosition;
+    /// <summary>重生点被更新时触发（跨房 / 检查点；持久层订阅做自动存档）。</summary>
+    public event Action<Vector2> SpawnPointChanged;
+
+    /// <summary>更新重生点（世界流式与检查点调用；默认为初始出生点）。</summary>
+    public void SetSpawnPoint(Vector2 globalPosition)
+    {
+        _spawnPosition = globalPosition;
+        SpawnPointChanged?.Invoke(globalPosition);
+    }
+
+    /// <summary>瞬移到指定位置（继续游戏落到存档点）：清速度、立即触发相机瞬移。</summary>
+    public void PlaceAt(Vector2 globalPosition)
+    {
+        GlobalPosition = globalPosition;
+        Velocity = Vector2.Zero;
+        Respawned?.Invoke();
+    }
 
     private void Respawn()
     {

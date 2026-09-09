@@ -35,6 +35,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "开始游戏"
 
+[node name="ContinueButton" type="Button" parent="Center/VBox"]
+custom_minimum_size = Vector2(240, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "继续游戏"
+
 [node name="QuitButton" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
