@@ -69,9 +69,13 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "操作"
 
-[node name="ActionsPlaceholder" type="Label" parent="Center/VBox"]
+[node name="ActionRows" type="VBoxContainer" parent="Center/VBox"]
 layout_mode = 2
-text = "（键位重映射后续版本加入）"
+
+[node name="ResetDefaultsButton" type="Button" parent="Center/VBox"]
+custom_minimum_size = Vector2(260, 36)
+layout_mode = 2
+text = "恢复默认键位"
 
 [node name="BackButton" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(260, 44)

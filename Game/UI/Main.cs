@@ -44,9 +44,11 @@ public partial class Main : Node
         _pauseMenu.MainMenuRequested += BackToMainMenu;
         _settingsMenu.ScreenshakeToggled += ApplyScreenshakeSetting;
 
-        // 启动即应用持久化设置（显示项 + 存量开关）
+        // 启动即应用持久化设置（显示项 + 存量开关 + 键位覆盖）
         SettingsService.Load();
         SettingsService.ApplyDisplay();
+        InputRemapStore.CaptureDefaults();
+        InputRemapStore.Apply();
     }
 
     /// <summary>打开设置页：记住来源（主菜单/暂停），返回时回来源界面。</summary>
