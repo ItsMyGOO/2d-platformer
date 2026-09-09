@@ -55,8 +55,8 @@ public partial class ProjectileEmitter : Node
         projectile.GlobalPosition =
             _character.GlobalPosition
             + new Vector2(_muzzleOffset.X * _motor.Facing, _muzzleOffset.Y);
-        // 弹体打到敌方受击盒：敌人发射 → 玩家受击盒（层3=值4）；玩家发射 → 敌人受击盒（层4=值8）
-        uint targetLayer = _character.IsPlayer ? 4u : 8u;
+        // 弹体打到敌方受击盒：玩家发射 → 敌人受击盒（层4=值8）；敌人发射 → 玩家受击盒（层3=值4）
+        uint targetLayer = _character.IsPlayer ? 8u : 4u;
         var attack = _motor.Config.Attack;
         projectile.Launch(
             facing,
