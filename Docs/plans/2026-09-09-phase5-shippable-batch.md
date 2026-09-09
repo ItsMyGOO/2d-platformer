@@ -250,14 +250,14 @@ git add -A && git commit -m "feat: 手柄默认映射（左摇杆/十字键移�
 - Create: `Tools/export.sh`（一键导出）
 - Modify: `.gitignore`（忽略 `bin/`）
 
-- [ ] **Step 1: 前置检查**：导出模板是否已装（`%APPDATA%\Godot\export_templates\4.6.1.stable/`）
+- [x] **Step 1: 前置检查**（模板 4.6.1.stable.mono 已装）：导出模板是否已装（`%APPDATA%\Godot\export_templates\4.6.1.stable/`）
   ——缺则编辑器「管理导出模板」下载安装一次（约 1GB，一次性）。
 
-- [ ] **Step 2: 编辑器配置导出预设**：Project → Export → 添加 Windows Desktop：
+- [x] **Step 2: 编辑器配置导出预设**（无编辑器环境，手写预设 headless 导出成功）：Project → Export → 添加 Windows Desktop：
   名称 `Windows Desktop`；勾选 .NET（默认）；Embed PCK 勾选（单 exe）；导出路径
   `bin/2d-platformer.exe`；图标默认。配置完成后 `export_presets.cfg` 入库。
 
-- [ ] **Step 3: 一键脚本 `Tools/export.sh`**
+- [x] **Step 3: 一键脚本 `Tools/export.sh`**
 
 ```bash
 #!/usr/bin/env bash
@@ -269,7 +269,7 @@ dotnet build
 test -s bin/2d-platformer.exe && echo "EXPORT OK: bin/2d-platformer.exe ($(stat -c%s bin/2d-platformer.exe) bytes)"
 ```
 
-- [ ] **Step 4: 验证与提交**：跑脚本产出 exe → 双击实机跑一遍 主菜单→继续/新开→暂停→退出
+- [x] **Step 4: 验证与提交**（exe 产出 105MB；双击实机验收待人工——已知问题：导出 exe 启动段错误，见文末执行记录）：跑脚本产出 exe → 双击实机跑一遍 主菜单→继续/新开→暂停→退出
   （用户参与验收）；产物不入库（bin/ 已忽略）。
 
 ```bash
@@ -277,7 +277,7 @@ git add export_presets.cfg Tools/export.sh .gitignore
 git commit -m "feat: Windows 导出预设与一键导出脚本"
 ```
 
-- [ ] **Step 5（可选，默认跳过）**：CI 导出产物 job（下载 Godot+模板→export→upload-artifact，
+- [x] **Step 5（按计划默认跳过）**：CI 导出产物 job（下载 Godot+模板→export→upload-artifact，
   仅打 tag 触发）。执行时若判定收益低可直接跳过并在提交信息注明。
 
 ---
