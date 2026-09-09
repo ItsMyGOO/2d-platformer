@@ -11,6 +11,8 @@ public partial class MainMenu : Control
 
     public event Action ContinueRequested;
 
+    public event Action SettingsRequested;
+
     public event Action QuitRequested;
 
     public override void _Ready()
@@ -19,6 +21,7 @@ public partial class MainMenu : Control
         var continueButton = GetNode<Button>("Center/VBox/ContinueButton");
         continueButton.Pressed += () => ContinueRequested?.Invoke();
         continueButton.Disabled = !SaveStore.Exists(); // 无存档时不可继续
+        GetNode<Button>("Center/VBox/SettingsButton").Pressed += () => SettingsRequested?.Invoke();
         GetNode<Button>("Center/VBox/QuitButton").Pressed += () => QuitRequested?.Invoke();
         GetNode<Button>("Center/VBox/StartButton").GrabFocus();
     }

@@ -8,11 +8,14 @@ public partial class PauseMenu : Control
 {
     public event Action ResumeRequested;
 
+    public event Action SettingsRequested;
+
     public event Action MainMenuRequested;
 
     public override void _Ready()
     {
         GetNode<Button>("Center/VBox/ResumeButton").Pressed += () => ResumeRequested?.Invoke();
+        GetNode<Button>("Center/VBox/SettingsButton").Pressed += () => SettingsRequested?.Invoke();
         GetNode<Button>("Center/VBox/MainMenuButton").Pressed += () => MainMenuRequested?.Invoke();
         Visible = false;
     }

@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://Game/UI/Main.cs" id="1_main"]
 [ext_resource type="PackedScene" path="res://Game/UI/MainMenu.tscn" id="2_menu"]
 [ext_resource type="PackedScene" path="res://Game/UI/PauseMenu.tscn" id="3_pause"]
+[ext_resource type="PackedScene" path="res://Game/UI/SettingsMenu.tscn" id="4_settings"]
 
 [node name="Main" type="Node"]
 process_mode = 3
@@ -13,6 +14,9 @@ script = ExtResource("1_main")
 [node name="MainMenu" parent="UiLayer" instance=ExtResource("2_menu")]
 
 [node name="PauseMenu" parent="UiLayer" instance=ExtResource("3_pause")]
+process_mode = 3
+
+[node name="SettingsMenu" parent="UiLayer" instance=ExtResource("4_settings")]
 process_mode = 3
 
 [node name="LevelRoot" type="Node" parent="."]

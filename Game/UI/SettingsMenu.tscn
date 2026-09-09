@@ -1,0 +1,80 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Game/UI/SettingsMenu.cs" id="1_settings"]
+
+[node name="SettingsMenu" type="Control"]
+process_mode = 3
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "设置"
+horizontal_alignment = 1
+
+[node name="DisplayHeader" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "显示"
+
+[node name="FullscreenCheck" type="CheckButton" parent="Center/VBox"]
+custom_minimum_size = Vector2(260, 36)
+layout_mode = 2
+text = "全屏"
+
+[node name="VsyncCheck" type="CheckButton" parent="Center/VBox"]
+custom_minimum_size = Vector2(260, 36)
+layout_mode = 2
+text = "垂直同步"
+
+[node name="GameplayHeader" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "玩法"
+
+[node name="ScreenshakeCheck" type="CheckButton" parent="Center/VBox"]
+custom_minimum_size = Vector2(260, 36)
+layout_mode = 2
+text = "命中震屏"
+
+[node name="ActionsHeader" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "操作"
+
+[node name="ActionsPlaceholder" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "（键位重映射后续版本加入）"
+
+[node name="BackButton" type="Button" parent="Center/VBox"]
+custom_minimum_size = Vector2(260, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "返回"
