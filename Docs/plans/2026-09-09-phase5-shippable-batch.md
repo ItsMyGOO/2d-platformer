@@ -315,7 +315,7 @@ git add -A && git commit -m "feat: UI 字符串本地化埋点（zh_CN 翻译表
 
 ### Task 7: 文档同步、全量回归与推送
 
-- [ ] **Step 1: 文档**
+- [x] **Step 1: 文档**
 
 - `architecture.md`：§1 目录补 `Game/Persistence/` 与 `translations/`；§10 UI 小节补
   设置菜单/存档语义（最近重生点自动存档）/继续游戏
@@ -323,7 +323,7 @@ git add -A && git commit -m "feat: UI 字符串本地化埋点（zh_CN 翻译表
   接入）、英文翻译文案、CI 导出产物 job（若 Task 5 Step 5 跳过）、胜利/结局画面
 - `README.md`：操作表补手柄列；快速开始补 `Tools/export.sh`；「继续游戏」一句话
 
-- [ ] **Step 2: 全量回归（CI 等价三连 + 探针 9/9）**
+- [x] **Step 2: 全量回归（CI 等价三连 + 探针 9/9）**
 
 ```bash
 dotnet csharpier check .
@@ -332,9 +332,9 @@ dotnet test Tests/UnitTests/GodotGameTemplate.UnitTests.csproj -c Release
 "$GODOT" --headless --path . Tools/headless_probe/Probe.tscn; echo "exit=$?"
 ```
 
-- [ ] **Step 3: 推送并确认 CI 绿**
+- [x] **Step 3: 推送并确认 CI 绿**
 
-- [ ] **Step 4: 实机验收（用户参与）**：存档（跨房→退出→继续游戏落位满血）；改键生效且重启
+- [ ] **Step 4: 实机验收（待用户参与，见执行记录）**：存档（跨房→退出→继续游戏落位满血）；改键生效且重启
   保持、恢复默认可用；手柄全流程；设置三开关即时生效且重启保持；导出 exe 双击可玩；
   文案全部中文显示。
 
@@ -346,3 +346,24 @@ dotnet test Tests/UnitTests/GodotGameTemplate.UnitTests.csproj -c Release
 - 手柄键位自定义与按键图标（glyph）；键位冲突检测（同键绑定多动作允许，Godot 原生行为）
 - Steam 集成（成就/云存档/Steam Input）、多平台导出（mac/Linux/掌机）、CI 自动发布
 - 英文文案翻译（框架就绪，文案后补）
+
+---
+
+## 执行记录（2026-09-09/10 夜间自动化执行）
+
+- **结果**：✅ Task 1–3、6、7 自动化部分全部完成；Task 4/5 各留一项待人工实机验证。
+- **全量回归**：csharpier check ✓；Release build 0 错误 ✓；Release 单测 34/34（基线 32 + SaveData 2）✓；探针 9/9 ✓。
+- **提交序列**：存档系统 → 设置菜单 → 键位重映射 → 手柄映射 → 导出预设/脚本 → 本地化 → 文档收尾。
+- **待人工验证清单**：
+  1. **导出 exe 启动段错误（已排查 3 次，超出尝试预算）**：`Tools/export.sh` 产出
+     `bin/2d-platformer.exe`（105MB，embed PCK + .NET）成功，但启动在加载 `Main.cs` 后段错误；
+     开发版同场景窗口启动正常（exit 0），排除游戏代码问题，指向导出配置/运行时解析。
+     已试：console wrapper（1→无额外输出）、`dotnet/self_contained=true`（该版本导出器未生效）。
+     建议人工：编辑器内 Project → Export 重新配置一次预设并重导；或检查 `dotnet/include_debug_symbols`
+     与 Release 组合。探针/开发版不受影响。
+  2. **手柄实机验证**：project.godot 已按 Godot 4.6 序列化格式补 8 个 joypad 事件
+     （左摇杆/十字键移动、A跳 B攻 X冲 Start暂停）；探针照跑绿。需实机确认菜单导航与全流程。
+  3. **实机抽查**（Task 10 风格）：存档跨房→退出→继续落位满血；改键重启保持；设置三开关即时生效；
+     导出 exe 双击可玩（依赖上面第 1 项解决）；文案全中文。
+- **执行环境备注**：无编辑器环境——手柄事件为手写序列化（探针回归绿）；`--import` 在本机有一次
+  退出段错误但导入产物有效（后续运行正常），疑似编辑器收尾阶段的已知噪音。

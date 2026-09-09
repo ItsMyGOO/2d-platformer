@@ -29,7 +29,9 @@ Game/
 ├── Gameplay/World/          # 关卡类玩法物件（World 九宫格房间流式 / KillZone 即死区）
 └── Scenes/                  # Main（应用编排）+ World（三房间无缝世界）+ BaseCharacter 基座
 │                              + Player / Slime（继承）+ TestLevel / RoomB / RoomC（房间）
-Game/UI/                     # UI 层（命名空间 GodotGameTemplate.UI）：Main 编排 + 主菜单/暂停/HUD
+Game/Persistence/            # 持久化层：SaveData/SaveStore（存档）、SettingsService（设置）、
+│                              InputRemapStore（键位覆盖）——全部落 user://，薄 IO 不进单测
+Game/UI/                     # UI 层（命名空间 GodotGameTemplate.UI）：Main 编排 + 主菜单/暂停/设置/HUD
 Tools/
 ├── generate_placeholder_art.py  # 占位图生成（16×16 ASCII 网格 → 最近邻 ×2 输出 32×32）
 └── headless_probe/              # 回归探针：脚本化输入 + 8 项 PASS/FAIL（见 §7）
@@ -211,14 +213,20 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 ```
 Main (Node, process_mode=Always)          ← Esc 处理、生命周期切换
 ├── UiLayer (CanvasLayer, Always)         ← 暂停时菜单仍可交互
-│   ├── MainMenu（开始/退出）
-│   ├── PauseMenu（继续/回主菜单，默认隐藏）
+│   ├── MainMenu（开始/继续/设置/退出）
+│   ├── PauseMenu（继续/设置/回主菜单，默认隐藏）
+│   ├── SettingsMenu（全屏/VSync/震屏 + 键位重映射，默认隐藏）
 │   └── Hud（开局后实例化并 Bind 玩家 Health）
 └── LevelRoot (Node, Pausable)            ← 关卡实例（名字固定 Level）
 ```
 
 - 开始游戏：释放菜单 → 实例化 `TestLevel` 到 LevelRoot → 实例化 Hud 并绑定玩家 Health。
-- Esc：游玩中 `get_tree().Paused = true` + 暂停菜单；暂停中 Esc 或「继续」恢复。
+- 继续游戏：先正常开局，再按 `user://save.json` 的最近重生点 `PlaceAt` 落位。
+- 存档语义：**最近重生点自动存档**——跨房/检查点更新重生点即写盘（Character.SpawnPointChanged
+  → SaveStore）；不做存档槽/存档菜单。设置（ConfigFile）与键位覆盖（JSON）同样持久化。
+- 设置菜单：主菜单与暂停菜单均可进入（记住来源，返回回来源界面）；全屏/VSync 即时应用，
+  震屏开关对当前玩家立即生效；「操作」节支持六动作改键（只替换键盘事件，保留手柄/鼠标）。
+- Esc：游玩中 `get_tree().Paused = true` + 暂停菜单；暂停中 Esc 或「继续」恢复；设置页中 Esc=返回。
 - 回主菜单：Unpause → 释放关卡与 HUD → 显示主菜单。
 - 玩家死亡 → 现有自动重生（回出生点、回满血、相机瞬移）即「死亡→重开」闭环。
 - 探针（`Tools/headless_probe`）直接实例化 World，不经过 Main——UI 改动不影响探针。
