@@ -288,7 +288,7 @@ git add -A && git commit -m "feat: HK 手感件——攻击反冲与下劈 Pogo�
 - `backlog.md`：勾记本批（魂量/剑气/轰炸敌/反冲/Pogo）；挂账新增：剑气穿透、上劈、
   炸弹 AoE 与引信动画、剑气蓄力、敌人劈弹免疫开关
 
-- [ ] **Step 2: 全量回归（CI 等价三连 + 探针 9/9）**
+- [x] **Step 2: 全量回归（CI 等价三连 + 探针 9/9）**
 
 ```bash
 dotnet csharpier check .
