@@ -204,9 +204,9 @@ git add -A && git commit -m "feat: 玩家剑气（魂量消耗，CastState/CastE
 - Modify: `Game/Gameplay/Characters/Character.cs`（玩家入组 `AddToGroup("player")`，_isPlayer 分支）
 - Modify: `Game/Scenes/RoomC.tscn`（Bomber1 @ (620, 642)）
 
-- [ ] **Step 1: 玩家标记**：`if (_isPlayer) { AddToGroup("player"); }`（全树寻址入口）
+- [x] **Step 1: 玩家标记**：`if (_isPlayer) { AddToGroup("player"); }`（全树寻址入口）
 
-- [ ] **Step 2: BombEmitter（弧线落点解算）**
+- [x] **Step 2: BombEmitter（弧线落点解算）**
 
 ```csharp
     // 订阅 Motor.AttackActiveChanged(true)（与 ProjectileEmitter 同钩子）：
@@ -219,14 +219,14 @@ git add -A && git commit -m "feat: 玩家剑气（魂量消耗，CastState/CastE
 
 （Gravity/FlightTime/MaxRange/muzzleOffset 均 [Export]；数值见表。）
 
-- [ ] **Step 3: Bomber.tscn**：借 Shooter.tscn 结构——BaseCharacter 继承、slime_frames 换
+- [x] **Step 3: Bomber.tscn**：借 Shooter.tscn 结构——BaseCharacter 继承、slime_frames 换
   modulate（橙棕）、Hitbox mask=4、Hurtbox layer=8、ContactDamager、ChaseDetector r300、
   **AIInput 直接复用 ShooterAIInputSource**（差异全在 Emitter：ProjectileEmitter → BombEmitter）、
   配置复用 slime_config.tres。
 
-- [ ] **Step 4: 入关 + e2e（用后删）**：轰炸敌与玩家隔 ~300px → 炸弹弧线飞行 → 玩家 HP 下降
+- [x] **Step 4: 入关 + e2e（用后删）**：轰炸敌与玩家隔 ~300px → 炸弹弧线飞行 → 玩家 HP 下降
 
-- [ ] **Step 5: 回归（探针 9/9——RoomC 加敌不进探针观察窗）+ 提交**
+- [x] **Step 5: 回归（探针 9/9——RoomC 加敌不进探针观察窗）+ 提交**
 
 ```bash
 git add -A && git commit -m "feat: 轰炸型敌人（弧线炸弹，落点解算，复用射手 AI 模式）"

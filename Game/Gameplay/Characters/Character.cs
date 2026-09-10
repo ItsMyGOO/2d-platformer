@@ -57,6 +57,10 @@ public partial class Character : CharacterBody2D
         _hurtbox = this.FindDescendant<Hurtbox>();
         _hurtbox?.Bind(this);
         _isPlayer = _inputSource is PlayerInputSource;
+        if (_isPlayer)
+        {
+            AddToGroup("player"); // 全树寻址入口（BombEmitter 等子系统）
+        }
 
         Health = new Health(_config.MaxHP, _config.InvincibilityTime);
         Health.Died += OnDied;
@@ -90,6 +94,7 @@ public partial class Character : CharacterBody2D
         _cameraRig?.Bind(this);
         this.FindDescendant<ProjectileEmitter>()?.Bind(this);
         this.FindDescendant<CastEmitter>()?.Bind(this);
+        this.FindDescendant<BombEmitter>()?.Bind(this);
 
         _spawnPosition = GlobalPosition;
     }

@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://Game/Scenes/Slime.tscn" id="1_slime"]
 [ext_resource type="Script" path="res://Game/Gameplay/World/KillZone.cs" id="2_kill"]
 [ext_resource type="PackedScene" path="res://Game/Scenes/HeartPickup.tscn" id="3_pickup"]
+[ext_resource type="PackedScene" path="res://Game/Scenes/Bomber.tscn" id="4_bomber"]
 [ext_resource type="TileSet" path="res://Game/Config/placeholder_tiles.tres" id="4_tiles"]
 
 [sub_resource type="RectangleShape2D" id="killzone"]
@@ -33,6 +34,9 @@ shape = SubResource("killzone")
 
 [node name="Slime1" parent="." instance=ExtResource("1_slime")]
 position = Vector2(400, 642)
+
+[node name="Bomber1" parent="." instance=ExtResource("4_bomber")]
+position = Vector2(620, 642)
 
 [node name="HeartPickup" parent="." instance=ExtResource("3_pickup")]
 position = Vector2(900, 542)
