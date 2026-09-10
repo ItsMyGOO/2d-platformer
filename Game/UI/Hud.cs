@@ -15,6 +15,9 @@ public partial class Hud : CanvasLayer
     private TextureRect[] _hearts;
     private Control _deathOverlay;
     private ColorRect _dim;
+    private Soul _soul;
+    private ColorRect _soulBack;
+    private ColorRect _soulFill;
 
     public override void _Ready()
     {
@@ -29,6 +32,8 @@ public partial class Hud : CanvasLayer
         _deathOverlay = GetNode<Control>("DeathOverlay");
         GetNode<Label>("DeathOverlay/Center/Label").Text = Tr("DEATH_TEXT");
         _dim = GetNode<ColorRect>("DeathOverlay/Dim");
+        _soulBack = GetNode<ColorRect>("SoulBack");
+        _soulFill = GetNode<ColorRect>("SoulBack/SoulFill");
     }
 
     /// <summary>绑定玩家并立即刷新（受伤/死亡/重生回满均经事件再刷新）。</summary>
@@ -42,9 +47,23 @@ public partial class Hud : CanvasLayer
         _player.Died += OnPlayerDied;
         _player.Respawned += OnPlayerRespawned;
         Refresh(_health.CurrentHP);
+
+        _soul = player.Motor.Soul; // 无魂系统（SoulMax=0）为 null，不订阅
+        _soulBack.Visible = _soul != null;
+        if (_soul != null)
+        {
+            _soul.SoulChanged += OnSoulChanged;
+            OnSoulChanged(_soul.Current, _soul.Max);
+        }
     }
 
     public override void _ExitTree() => Unbind();
+
+    private void OnSoulChanged(int current, int max)
+    {
+        float ratio = max > 0 ? (float)current / max : 0f;
+        _soulFill.Size = new Vector2(158f * ratio, 6f);
+    }
 
     private void OnHealthChanged(int currentHP) => Refresh(currentHP);
 
@@ -86,6 +105,11 @@ public partial class Hud : CanvasLayer
         _health.Died -= OnHealthDied;
         _player.Died -= OnPlayerDied;
         _player.Respawned -= OnPlayerRespawned;
+        if (_soul != null)
+        {
+            _soul.SoulChanged -= OnSoulChanged;
+            _soul = null;
+        }
         _player = null;
         _health = null;
     }

@@ -64,6 +64,9 @@ public class CharacterMotor
     /// <summary>本帧意图快照，供状态的 Enter 决策使用（如冲刺方向）。</summary>
     public InputIntent LastIntent { get; private set; }
 
+    /// <summary>魂量容器；SoulMax=0（敌人）为 null。</summary>
+    public Soul Soul { get; }
+
     private float _dashCooldownTimer;
     private float _attackCooldownTimer;
 
@@ -77,6 +80,7 @@ public class CharacterMotor
         _hurtState = new HurtState(this);
         _deadState = new DeadState(this);
         CurrentState = _groundedState;
+        Soul = config.SoulMax > 0 ? new Soul(config.SoulMax) : null;
     }
 
     /// <summary>物理移动前调用：推进计时器并让当前状态计算本帧速度。</summary>
@@ -188,6 +192,9 @@ public class CharacterMotor
 
     internal void NotifyAttackActive(bool active) => AttackActiveChanged?.Invoke(active);
 
+    /// <summary>近战命中积魂（无魂系统时忽略）。</summary>
+    public void GainSoul() => Soul?.Gain(_config.SoulGainPerHit);
+
     internal void SetFacing(int facing)
     {
         if (facing != 0)
@@ -233,6 +240,7 @@ public class CharacterMotor
         WasJumpHeld = false;
         IsOnFloor = true;
         Velocity = Vector2.Zero;
+        Soul?.Clear(); // 重生清魂，不持久化
         ChangeState(_groundedState);
     }
 }

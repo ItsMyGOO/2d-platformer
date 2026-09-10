@@ -50,6 +50,12 @@ public class CharacterConfigData
     /// <summary>攻击能力；null 表示不具备。</summary>
     public AttackData Attack { get; init; }
 
+    /// <summary>魂量上限；0 表示无魂系统（敌人默认）。</summary>
+    public int SoulMax { get; init; }
+
+    /// <summary>每次近战命中积攒的魂量。</summary>
+    public int SoulGainPerHit { get; init; }
+
     /// <summary>冲刺能力数值，语义同 <see cref="DashConfig"/> 同名属性。</summary>
     public class DashData
     {

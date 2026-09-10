@@ -78,6 +78,11 @@ public partial class Character : CharacterBody2D
                     _config.Attack.KnockbackVertical
                 );
         }
+
+        if (Motor.Soul != null)
+        {
+            _hitbox.HitConfirmed += () => Motor.GainSoul(); // 近战命中攒魂
+        }
         _presenter?.Bind(Motor, Health);
         _screenShake = this.FindDescendant<ScreenShake>();
         _screenShake?.Bind(Health, _hitbox);

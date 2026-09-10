@@ -64,6 +64,14 @@ public partial class CharacterConfig : Resource
     [Export]
     public AttackConfig Attack { get; set; }
 
+    /// <summary>魂量上限；0 表示无魂系统（敌人默认）。</summary>
+    [Export]
+    public int SoulMax { get; set; }
+
+    /// <summary>每次近战命中积攒的魂量。</summary>
+    [Export]
+    public int SoulGainPerHit { get; set; }
+
     /// <summary>映射为逻辑层运行态配置（见 <see cref="CharacterConfigData"/>）。</summary>
     public CharacterConfigData ToData() =>
         new()
@@ -80,6 +88,8 @@ public partial class CharacterConfig : Resource
             MaxHP = MaxHP,
             InvincibilityTime = InvincibilityTime,
             HurtStunTime = HurtStunTime,
+            SoulMax = SoulMax,
+            SoulGainPerHit = SoulGainPerHit,
             Dash =
                 Dash == null
                     ? null

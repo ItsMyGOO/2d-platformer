@@ -106,14 +106,14 @@ git add -A && git commit -m "feat: 弹体支持弧线弹道（可选重力）与
 - Modify: `Game/Config/player_config.tres`（SoulMax=33, SoulGainPerHit=11）
 - Create: `Tests/UnitTests/SoulTests.cs`
 
-- [ ] **Step 1: Soul 组件**：`Soul(max)`；`Current`；`TrySpend(int)→bool`（不足拒绝且不动值）；
+- [x] **Step 1: Soul 组件**：`Soul(max)`；`Current`；`TrySpend(int)→bool`（不足拒绝且不动值）；
   `Gain(int)`（封顶）；`Clear()`；事件 `SoulChanged(int current, int max)`。
 
-- [ ] **Step 2: Motor 接入**：构造时 `Soul = config.SoulMax > 0 ? new Soul(config.SoulMax) : null`；
+- [x] **Step 2: Motor 接入**：构造时 `Soul = config.SoulMax > 0 ? new Soul(config.SoulMax) : null`；
   `public Soul Soul { get; }`；`public void GainSoul() => Soul?.Gain(Config.SoulGainPerHit);`
   `Reset()` 内 `Soul?.Clear();`（重生清零）。
 
-- [ ] **Step 3: 命中积攒**：Character._Ready 在既有攻击 Configure 段后：
+- [x] **Step 3: 命中积攒**：Character._Ready 在既有攻击 Configure 段后：
 
 ```csharp
         if (Motor.Soul != null)
@@ -122,10 +122,10 @@ git add -A && git commit -m "feat: 弹体支持弧线弹道（可选重力）与
         }
 ```
 
-- [ ] **Step 4: HUD 魂条**：心形下方 (16, 56) 背景条 160×8 + 白色填充条；`Hud.Bind` 订阅
+- [x] **Step 4: HUD 魂条**：心形下方 (16, 56) 背景条 160×8 + 白色填充条；`Hud.Bind` 订阅
   `player.Motor.Soul.SoulChanged`（Soul 为 null 不订阅）按比例设填充宽。
 
-- [ ] **Step 5: 单测 + 回归 + 提交**
+- [x] **Step 5: 单测 + 回归 + 提交**
 
 SoulTests：Gain 封顶与事件、TrySpend 成功/不足拒绝、Clear；Motor 集成：Reset 后魂归零。
 

@@ -29,5 +29,7 @@ JumpBufferTime = 0.12
 MaxFallSpeed = 1040.0
 InvincibilityTime = 0.8
 HurtStunTime = 0.3
+SoulMax = 33
+SoulGainPerHit = 11
 Dash = SubResource("Resource_dash")
 Attack = SubResource("Resource_attack")
