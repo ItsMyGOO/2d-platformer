@@ -89,6 +89,7 @@ public partial class Character : CharacterBody2D
         _cameraRig = this.FindDescendant<CameraRig>();
         _cameraRig?.Bind(this);
         this.FindDescendant<ProjectileEmitter>()?.Bind(this);
+        this.FindDescendant<CastEmitter>()?.Bind(this);
 
         _spawnPosition = GlobalPosition;
     }

@@ -50,6 +50,9 @@ public class CharacterConfigData
     /// <summary>攻击能力；null 表示不具备。</summary>
     public AttackData Attack { get; init; }
 
+    /// <summary>剑气能力；null 表示不具备。</summary>
+    public CastData Cast { get; init; }
+
     /// <summary>魂量上限；0 表示无魂系统（敌人默认）。</summary>
     public int SoulMax { get; init; }
 
@@ -95,5 +98,30 @@ public class CharacterConfigData
 
         /// <summary>攻击冷却（秒），从出招瞬间起算。</summary>
         public float Cooldown { get; init; }
+    }
+
+    /// <summary>剑气数值，语义同 <see cref="CastConfig"/> 同名属性。</summary>
+    public class CastData
+    {
+        /// <summary>前摇时长（秒）：施法到弹体出膛。</summary>
+        public float WindupTime { get; init; }
+
+        /// <summary>后摇时长（秒）：出膛到恢复可控。</summary>
+        public float RecoveryTime { get; init; }
+
+        /// <summary>冷却（秒），从施法瞬间起算。</summary>
+        public float Cooldown { get; init; }
+
+        /// <summary>单次伤害。</summary>
+        public int Damage { get; init; }
+
+        /// <summary>击退水平速度（像素/秒）。</summary>
+        public float KnockbackHorizontal { get; init; }
+
+        /// <summary>击退垂直速度（像素/秒，正值向上弹起）。</summary>
+        public float KnockbackVertical { get; init; }
+
+        /// <summary>魂量消耗；不足则拒发。</summary>
+        public int SoulCost { get; init; }
     }
 }

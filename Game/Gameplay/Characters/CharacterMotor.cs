@@ -19,6 +19,7 @@ public class CharacterMotor
     private readonly AirborneState _airborneState;
     private readonly DashState _dashState;
     private readonly AttackState _attackState;
+    private readonly CastState _castState;
     private readonly HurtState _hurtState;
     private readonly DeadState _deadState;
 
@@ -33,6 +34,9 @@ public class CharacterMotor
 
     /// <summary>攻击判定窗口开/关。逻辑层不碰节点，由编排者订阅驱动 Hitbox。</summary>
     public event Action<bool> AttackActiveChanged;
+
+    /// <summary>剑气前摇结束瞬间触发（CastEmitter 发射弹体）。</summary>
+    public event Action CastFired;
 
     /// <summary>运行态配置（只读）；编辑态 Resource 在 Character._Ready 经 ToData() 映射而来。</summary>
     public CharacterConfigData Config => _config;
@@ -69,6 +73,7 @@ public class CharacterMotor
 
     private float _dashCooldownTimer;
     private float _attackCooldownTimer;
+    private float _castCooldownTimer;
 
     public CharacterMotor(CharacterConfigData config)
     {
@@ -77,6 +82,7 @@ public class CharacterMotor
         _airborneState = new AirborneState(this);
         _dashState = new DashState(this);
         _attackState = new AttackState(this);
+        _castState = new CastState(this);
         _hurtState = new HurtState(this);
         _deadState = new DeadState(this);
         CurrentState = _groundedState;
@@ -132,6 +138,10 @@ public class CharacterMotor
         if (_attackCooldownTimer > 0f)
         {
             _attackCooldownTimer -= delta;
+        }
+        if (_castCooldownTimer > 0f)
+        {
+            _castCooldownTimer -= delta;
         }
     }
 
@@ -192,6 +202,25 @@ public class CharacterMotor
 
     internal void NotifyAttackActive(bool active) => AttackActiveChanged?.Invoke(active);
 
+    /// <summary>尝试施放剑气。配置缺失、冷却中或魂不足（原子扣魂）返回 false。</summary>
+    internal bool TryStartCast()
+    {
+        var cast = _config.Cast;
+        if (cast == null || _castCooldownTimer > 0f)
+        {
+            return false;
+        }
+        if (Soul != null && !Soul.TrySpend(cast.SoulCost))
+        {
+            return false; // 魂不足拒绝且不扣
+        }
+        _castCooldownTimer = cast.Cooldown;
+        ChangeState(_castState);
+        return true;
+    }
+
+    internal void NotifyCastFired() => CastFired?.Invoke();
+
     /// <summary>近战命中积魂（无魂系统时忽略）。</summary>
     public void GainSoul() => Soul?.Gain(_config.SoulGainPerHit);
 
@@ -235,6 +264,7 @@ public class CharacterMotor
     {
         _dashCooldownTimer = 0f;
         _attackCooldownTimer = 0f;
+        _castCooldownTimer = 0f;
         TimeSinceJumpPressed = TimerExpired;
         TimeSinceLeftFloor = TimerExpired;
         WasJumpHeld = false;

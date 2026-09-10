@@ -154,11 +154,11 @@ git add -A && git commit -m "feat: HK 式魂量系统（近战命中积攒，HUD
 - Modify: `Game/Scenes/Player.tscn`（CastEmitter 节点）、`Game/Config/player_config.tres`（Cast 接入）
 - Create: `Tests/UnitTests/CastTests.cs`
 
-- [ ] **Step 1: 输入与意图**（project.godot / RemapStore / InputIntent / PlayerInputSource）
+- [x] **Step 1: 输入与意图**（project.godot / RemapStore / InputIntent / PlayerInputSource）
 
-- [ ] **Step 2: 配置双形态**（CastConfig + POCO CastData + ToData；数值见表）
+- [x] **Step 2: 配置双形态**（CastConfig + POCO CastData + ToData；数值见表）
 
-- [ ] **Step 3: Motor 与状态机**：
+- [x] **Step 3: Motor 与状态机**：
 
 ```csharp
     /// <summary>剑气前摇结束瞬间触发（CastEmitter 发射弹体）。</summary>
@@ -179,16 +179,16 @@ git add -A && git commit -m "feat: HK 式魂量系统（近战命中积攒，HUD
 RouteCombatActions 追加 `if (intent.CastPressed) { Motor.TryStartCast(); }`；
 UpdateTimers 加冷却递减；Reset 清冷却。
 
-- [ ] **Step 4: CastEmitter 与新月弹**（发射逻辑照 ProjectileEmitter 模式；弹速由场景
+- [x] **Step 4: CastEmitter 与新月弹**（发射逻辑照 ProjectileEmitter 模式；弹速由场景
   Speed=420 决定，Launch 只传方向）
 
-- [ ] **Step 5: 单测**（CastTests）：无配置忽略 / 冷却拒绝 / 魂不足拒绝且不扣 / 成功扣魂并
+- [x] **Step 5: 单测**（CastTests）：无配置忽略 / 冷却拒绝 / 魂不足拒绝且不扣 / 成功扣魂并
   前摇末触发 CastFired / 攻击中发剑气被拒 / 剑气中攻击与冲刺被拒 / 受击打断
 
-- [ ] **Step 6: e2e 临时测试（用后删）**：隔离史莱姆 → 按 cast → 新月弹命中史莱姆掉血、
+- [x] **Step 6: e2e 临时测试（用后删）**：隔离史莱姆 → 按 cast → 新月弹命中史莱姆掉血、
   魂 33→22；再近战命中 → 魂 +11
 
-- [ ] **Step 7: 回归 + 提交**
+- [x] **Step 7: 回归 + 提交**
 
 ```bash
 git add -A && git commit -m "feat: 玩家剑气（魂量消耗，CastState/CastEmitter/新月弹，改键与手柄接入）"
@@ -263,13 +263,13 @@ git add -A && git commit -m "feat: 轰炸型敌人（弧线炸弹，落点解算
 
 - [ ] **Step 4: Character 接线**（反冲 + Pogo 弹跳 + 攻击开始时切命中盒朝向）
 
-- [ ] **Step 5: 单测**：DownHeld 进意图并透传；空中+DownHeld 攻击 → AttackDownOriented=true、
+- [x] **Step 5: 单测**：DownHeld 进意图并透传；空中+DownHeld 攻击 → AttackDownOriented=true、
   地面为 false；Bounce 设置上升速度；ApplyImpulse 叠加速度
 
 - [ ] **Step 6: e2e（用后删）**：①空中下劈史莱姆 → 玩家 Vy<0 弹起且史莱姆掉血；
   ②下劈飞行中的炸弹 → 炸弹消失且玩家弹起
 
-- [ ] **Step 7: 回归 + 提交**
+- [x] **Step 7: 回归 + 提交**
 
 ```bash
 git add -A && git commit -m "feat: HK 手感件——攻击反冲与下劈 Pogo（可劈碎弹体借力弹跳）"

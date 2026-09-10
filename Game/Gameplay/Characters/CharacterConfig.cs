@@ -64,6 +64,10 @@ public partial class CharacterConfig : Resource
     [Export]
     public AttackConfig Attack { get; set; }
 
+    /// <summary>剑气能力配置；null 表示不具备剑气。</summary>
+    [Export]
+    public CastConfig Cast { get; set; }
+
     /// <summary>魂量上限；0 表示无魂系统（敌人默认）。</summary>
     [Export]
     public int SoulMax { get; set; }
@@ -112,6 +116,19 @@ public partial class CharacterConfig : Resource
                         KnockbackHorizontal = Attack.KnockbackHorizontal,
                         KnockbackVertical = Attack.KnockbackVertical,
                         Cooldown = Attack.Cooldown,
+                    },
+            Cast =
+                Cast == null
+                    ? null
+                    : new CharacterConfigData.CastData
+                    {
+                        WindupTime = Cast.WindupTime,
+                        RecoveryTime = Cast.RecoveryTime,
+                        Cooldown = Cast.Cooldown,
+                        Damage = Cast.Damage,
+                        KnockbackHorizontal = Cast.KnockbackHorizontal,
+                        KnockbackVertical = Cast.KnockbackVertical,
+                        SoulCost = Cast.SoulCost,
                     },
         };
 }

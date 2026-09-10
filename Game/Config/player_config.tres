@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://v8fncj7fxyg4" path="res://Game/Gameplay/Characters/CharacterConfig.cs" id="1_cfg"]
 [ext_resource type="Script" uid="uid://carqf38yujt70" path="res://Game/Gameplay/Characters/DashConfig.cs" id="2_dash"]
 [ext_resource type="Script" uid="uid://cr350ikyxoyll" path="res://Game/Gameplay/Characters/AttackConfig.cs" id="3_atk"]
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/CastConfig.cs" id="4_cast"]
 
 [sub_resource type="Resource" id="Resource_attack"]
 script = ExtResource("3_atk")
@@ -15,6 +16,16 @@ Speed = 840.0
 Duration = 0.18
 Cooldown = 0.6
 EndSpeedKeepRatio = 0.4
+
+[sub_resource type="Resource" id="Resource_cast"]
+script = ExtResource("4_cast")
+WindupTime = 0.08
+RecoveryTime = 0.22
+Cooldown = 0.4
+Damage = 1
+KnockbackHorizontal = 200.0
+KnockbackVertical = 80.0
+SoulCost = 11
 
 [resource]
 script = ExtResource("1_cfg")
@@ -33,3 +44,4 @@ SoulMax = 33
 SoulGainPerHit = 11
 Dash = SubResource("Resource_dash")
 Attack = SubResource("Resource_attack")
+Cast = SubResource("Resource_cast")

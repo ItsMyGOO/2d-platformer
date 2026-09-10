@@ -29,6 +29,8 @@ PALETTE = {
     "b": (44, 42, 52, 255),   # bomb body (dark charcoal)
     "h": (120, 114, 134, 255),# bomb highlight
     "f": (255, 160, 64, 255), # fuse spark (orange)
+    "c": (150, 200, 255, 255),# crescent (light blue)
+    "u": (90, 130, 200, 255), # crescent outline (deep blue)
 }
 
 PLAYER_IDLE = [
@@ -418,6 +420,25 @@ BOMB = [
     "................",
 ]
 
+CRESCENT = [
+    "................",
+    "................",
+    ".......uuuu.....",
+    ".....uucccu.....",
+    "....uucccccu....",
+    "...uucccccccu...",
+    "...uucccccccu...",
+    "...uucccccccu...",
+    "...uucccccccu...",
+    "...uucccccccu...",
+    "....uucccccu....",
+    ".....uucccu.....",
+    ".......uuuu.....",
+    "................",
+    "................",
+    "................",
+]
+
 
 def scale2x(rows):
     """最近邻 ×2：每像素横向复制一次、每行纵向复制一次。"""
@@ -521,6 +542,7 @@ def main():
         "heart.png": HEART,
         "projectile.png": PROJECTILE,
         "bomb.png": BOMB,
+        "crescent.png": CRESCENT,
     }
     for name, rows in images.items():
         write_png(os.path.join(OUT, name), scale2x(rows))

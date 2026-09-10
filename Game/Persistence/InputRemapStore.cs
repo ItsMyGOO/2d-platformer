@@ -18,6 +18,7 @@ public static class InputRemapStore
         "move_right",
         "jump",
         "attack",
+        "cast",
         "dash",
         "pause",
     };

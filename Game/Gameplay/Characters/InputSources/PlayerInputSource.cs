@@ -20,12 +20,16 @@ public partial class PlayerInputSource : InputSource
     [Export]
     private string _attackAction = "attack";
 
+    [Export]
+    private string _castAction = "cast";
+
     public override InputIntent Poll(float delta) =>
         InputIntent.Create(
             Input.GetAxis(_moveLeftAction, _moveRightAction),
             Input.IsActionJustPressed(_jumpAction),
             Input.IsActionPressed(_jumpAction),
             Input.IsActionJustPressed(_dashAction),
-            Input.IsActionJustPressed(_attackAction)
+            Input.IsActionJustPressed(_attackAction),
+            Input.IsActionJustPressed(_castAction)
         );
 }

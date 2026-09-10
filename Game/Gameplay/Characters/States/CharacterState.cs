@@ -74,9 +74,13 @@ public abstract class CharacterState
         {
             return;
         }
-        if (intent.AttackPressed)
+        if (intent.AttackPressed && Motor.TryStartAttack())
         {
-            Motor.TryStartAttack();
+            return; // 攻击成功即本帧互斥，不再路由剑气
+        }
+        if (intent.CastPressed)
+        {
+            Motor.TryStartCast();
         }
     }
 
