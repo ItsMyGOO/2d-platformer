@@ -54,7 +54,7 @@ projectile（弹体可被近战劈碎）。
 - Create: `Game/Scenes/Bomb.tscn`
 - Modify: `Tools/generate_placeholder_art.py`（+ bomb.png）
 
-- [ ] **Step 1: Projectile 弧线模式**
+- [x] **Step 1: Projectile 弧线模式**
 
 ```csharp
     [Export]
@@ -79,13 +79,13 @@ projectile（弹体可被近战劈碎）。
 
 （公共赋值逻辑抽私有 `Setup(damage, kbH, kbV, targetLayer)`，两入口共用；MaxLifetime 两模式通用。）
 
-- [ ] **Step 2: 炸弹美术与场景**
+- [x] **Step 2: 炸弹美术与场景**
 
 美术脚本加 `BOMB` 网格（深色球体+引信+高光，新调色板字符），输出 32×32 `bomb.png`；
 `Bomb.tscn`：Projectile 脚本 + bomb 贴图 + CircleShape r10 + 场景内 `Gravity = 900`、
 `MaxLifetime = 3`。
 
-- [ ] **Step 3: 构建与提交**（新资源先 `--import`）
+- [x] **Step 3: 构建与提交**（新资源先 `--import`）
 
 ```bash
 "$GODOT" --headless --import && dotnet build && dotnet test Tests/UnitTests/GodotGameTemplate.UnitTests.csproj

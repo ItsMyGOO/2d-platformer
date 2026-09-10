@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Game/Gameplay/Characters/Combat/Projectile.cs" id="1_bomb"]
+[ext_resource type="Texture2D" path="res://Game/Art/Placeholders/bomb.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="shape"]
+radius = 10.0
+
+[node name="Bomb" type="Area2D"]
+collision_layer = 0
+collision_mask = 4
+script = ExtResource("1_bomb")
+Gravity = 900.0
+MaxLifetime = 3.0
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+shape = SubResource("shape")
