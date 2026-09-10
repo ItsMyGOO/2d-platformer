@@ -17,15 +17,17 @@ Game/
 │   ├── CharacterMotor.cs        # 逻辑层宿主（纯 C# 类，可单元测试）
 │   ├── CharacterConfig.cs       # 编辑态数值配置（Resource，嵌套 Dash/AttackConfig）
 │   ├── CharacterConfigData.cs   # 运行态数值配置（纯 C# POCO，见 §3）
-│   ├── DashConfig.cs / AttackConfig.cs
+│   ├── DashConfig.cs / AttackConfig.cs / CastConfig.cs
 │   ├── CharacterVisualState.cs  # 表现动画枚举（idle/run/jump/fall/dash/attack/hurt/dead）
 │   ├── InputIntent.cs           # 意图层（readonly struct）
 │   ├── CharacterPresenter.cs    # 表现层：动画/朝向/尘土/无敌闪烁
 │   ├── ScreenShake.cs           # 表现层：命中/受击 → 相机噪声发射器
 │   ├── CameraRig.cs             # 表现层：重生 → 相机瞬移
-│   ├── Combat/                  # 战斗子系统：DamageInfo / Health / Hitbox / Hurtbox
-│   ├── InputSources/            # 输入层：InputSource 抽象 + Player / SlimeAI 两实现
-│   └── States/                  # 类式状态机：CharacterState 基类 + 6 个行为状态
+│   ├── Combat/                  # 战斗子系统：DamageInfo / Health / Hitbox / Hurtbox /
+│   │                            #   Soul（魂量）/ Projectile（直线+弧线弹体）/
+│   │                            #   ProjectileEmitter / CastEmitter（剑气）/ BombEmitter（轰炸）
+│   ├── InputSources/            # 输入层：InputSource 抽象 + Player / SlimeAI / ShooterAI 实现
+│   └── States/                  # 类式状态机：CharacterState 基类 + 7 个行为状态
 ├── Gameplay/World/          # 关卡类玩法物件（World 九宫格房间流式 / KillZone 即死区）
 └── Scenes/                  # Main（应用编排）+ World（三房间无缝世界）+ BaseCharacter 基座
 │                              + Player / Slime（继承）+ TestLevel / RoomB / RoomC（房间）
@@ -35,7 +37,7 @@ Game/UI/                     # UI 层（命名空间 GodotGameTemplate.UI）：M
 Tools/
 ├── generate_placeholder_art.py  # 占位图生成（16×16 ASCII 网格 → 最近邻 ×2 输出 32×32）
 └── headless_probe/              # 回归探针：脚本化输入 + 8 项 PASS/FAIL（见 §7）
-Tests/UnitTests/                 # xUnit 纯单元测试（25 个）
+Tests/UnitTests/                 # xUnit 纯单元测试（53 个）
 Docs/                            # 项目文档（索引见 §11）
 addons/phantom_camera/           # Phantom Camera 插件（相机跟随与震屏，见 Docs/camera-design.md）
 ```
@@ -70,6 +72,9 @@ Motor、States、Health、DamageInfo 全是纯 C#，不引用任何 Node/Resourc
 
 **玩家与敌人共用一切逻辑**：差异只有三处——输入源子节点（键盘 vs AI）、
 数值配置 `.tres`、外观 `SpriteFrames`。AI 产出与键盘完全相同的 `InputIntent`。
+
+`InputIntent` 意图字段：`MoveAxis` / `JumpPressed` / `JumpHeld` / `DashPressed` /
+`AttackPressed` / `CastPressed`（剑气脉冲）/ `DownHeld`（下方向按住，空中下劈朝向判定）。
 
 ## 3. 配置双形态（编辑态 Resource ↔ 运行态 POCO）
 
@@ -117,9 +122,19 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
 | 3 | 4 | player_hurtbox | 玩家受击盒（敌人 Hitbox/ContactDamager 的 mask） |
 | 4 | 8 | enemy_hurtbox | 敌人受击盒（玩家 Hitbox 的 mask） |
 | 5 | 16 | player_body | 玩家实体（ChaseDetector/KillZone 的 mask） |
+| 6 | 32 | projectile | 弹体（可被近战命中盒劈碎，第六期） |
 
 - **接触伤害**：敌人身上常驻 `ContactDamager`（Area2D，与身体同尺寸），每帧轮询重叠并结算——
   `Health` 无敌帧天然限频（0.8s/次）；数值与挥击同源（AttackConfig 经 Configure 下发）。
+- **魂量循环（第六期，HK 式）**：近战命中结算成功 → `HitConfirmed` → `Motor.GainSoul()` 积攒
+  （上限 `SoulMax`，敌人 0 即无魂系统）；施放剑气原子扣魂（不足拒发）。重生 `Reset()` 清零，不持久化。
+- **剑气**：`CastState`（前摇→`CastFired`→后摇，镜像 AttackState）+ `CastEmitter`
+  （订阅 CastFired 发新月弹）；`TryStartCast` 原子扣魂，互斥与打断规则同 Attack。
+- **命中反冲**：命中结算成功 → 攻击者获得 `−Facing × RecoilVelocity` 冲量
+  （地面被摩擦自然衰减，空中全额）。
+- **下劈 Pogo**：空中 + 按住下发起的攻击置 `AttackDownOriented`（命中盒切下向 (0,26)）；
+  命中结算成功且仍在空中 → `Bounce()` 以 75% 跳跃速度向上弹起。命中盒可劈碎弹体
+  （层 32，`Projectile.Struck()` 销毁），劈弹同样触发 HitConfirmed → 反冲/Pogo/攒魂。
 
 ## 5. 表现层与 UI
 
@@ -191,10 +206,14 @@ Hitbox(Area2D, 攻击方) ──每物理帧轮询 GetOverlappingAreas──▶ 
    远程敌人参照 Shooter：`ShooterAIInputSource`（视野内周期发攻击脉冲）+
    `ProjectileEmitter`（订阅 AttackActiveChanged 在判定窗口开启瞬间朝面朝方向发射弹体）+
    `Projectile.tscn`（直线弹体：命中受击盒结算、撞地形销毁、超时自毁）。
+   轰炸敌人参照 Bomber（第六期）：AI 直接复用 `ShooterAIInputSource`，差异全在
+   `BombEmitter`（订阅同一钩子，按抛物线方程解算初速把炸弹送到玩家所在位置；
+   玩家经组 `"player"` 寻址，无玩家时平射兜底），弹体用 `Bomb.tscn`（弧线+重力）。
 
 ## 9. 扩展指南：新增一个状态
 
-以 `DashState`（冲刺）为参照：
+以 `DashState`（冲刺）为参照；带前摇/后摇的攻击类状态参照 `CastState`（剑气，第六期，
+镜像 `AttackState`：前摇末经 `Motor.NotifyCastFired()` 通知发射器，互斥与打断规则同 Attack）：
 
 1. **状态类**：`States/YourState.cs` 继承 `CharacterState`，实现 `Process(intent, delta, gravity)`
    （每帧计算速度）与 `VisualState`；需要的数据放 `Motor` 上下文（新增 internal 属性/字段），

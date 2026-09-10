@@ -279,7 +279,7 @@ git add -A && git commit -m "feat: HK 手感件——攻击反冲与下劈 Pogo�
 
 ### Task 6: 文档同步、全量回归与推送
 
-- [ ] **Step 1: 文档**
+- [x] **Step 1: 文档**
 
 - `architecture.md`：§2 意图字段表补 CastPressed/DownHeld；§4 战斗闭环补魂量循环/剑气/
   反冲/Pogo/弹体层（物理层表加 6=projectile 值 32）；§8 新增敌人指南补 Bomber 参照
