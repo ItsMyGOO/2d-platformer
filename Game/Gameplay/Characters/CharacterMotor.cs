@@ -56,6 +56,9 @@ public class CharacterMotor
     /// <summary>最近一帧的地面事实（PostPhysics 回喂）。</summary>
     public bool IsOnFloor { get; private set; } = true;
 
+    /// <summary>本次攻击是否为空中下劈朝向（命中盒切下向 + Pogo 弹跳判定）。</summary>
+    public bool AttackDownOriented { get; private set; }
+
     /// <summary>距上次按下跳跃的时间（秒）；跳跃缓冲依据，长期未按为 TimerExpired。</summary>
     public float TimeSinceJumpPressed { get; private set; } = TimerExpired;
 
@@ -195,6 +198,7 @@ public class CharacterMotor
             return false;
         }
         _attackCooldownTimer = _config.Attack.Cooldown;
+        AttackDownOriented = !IsOnFloor && LastIntent.DownHeld; // 空中 + 按下 = 下劈
         AttackStarted?.Invoke();
         ChangeState(_attackState);
         return true;
@@ -223,6 +227,14 @@ public class CharacterMotor
 
     /// <summary>近战命中积魂（无魂系统时忽略）。</summary>
     public void GainSoul() => Soul?.Gain(_config.SoulGainPerHit);
+
+    /// <summary>
+    /// 冲量：直接叠加水平/垂直速度。地面攻击反冲由摩擦自然衰减，空中全额保留。
+    /// </summary>
+    public void ApplyImpulse(Vector2 impulse) => Velocity += impulse;
+
+    /// <summary>Pogo 弹跳：以跳跃速度的 75% 向上弹起（JumpVelocity 为负=向上）。</summary>
+    public void Bounce() => Velocity = new Vector2(Velocity.X, _config.JumpVelocity * 0.75f);
 
     internal void SetFacing(int facing)
     {

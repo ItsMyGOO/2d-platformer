@@ -26,6 +26,9 @@ public readonly struct InputIntent
     /// <summary>本帧是否新按下了剑气（脉冲信号）。</summary>
     public bool CastPressed { get; init; }
 
+    /// <summary>下方向键当前是否被按住（空中下劈朝向判定）。</summary>
+    public bool DownHeld { get; init; }
+
     /// <summary>构造一帧意图；MoveAxis 超出 [-1,1] 会被钳制。</summary>
     public static InputIntent Create(
         float moveAxis,
@@ -33,7 +36,8 @@ public readonly struct InputIntent
         bool jumpHeld,
         bool dashPressed = false,
         bool attackPressed = false,
-        bool castPressed = false
+        bool castPressed = false,
+        bool downHeld = false
     ) =>
         new()
         {
@@ -43,5 +47,6 @@ public readonly struct InputIntent
             DashPressed = dashPressed,
             AttackPressed = attackPressed,
             CastPressed = castPressed,
+            DownHeld = downHeld,
         };
 }

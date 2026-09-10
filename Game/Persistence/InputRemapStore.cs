@@ -21,6 +21,7 @@ public static class InputRemapStore
         "cast",
         "dash",
         "pause",
+        "move_down",
     };
 
     private static readonly Dictionary<string, Key> Defaults = new();

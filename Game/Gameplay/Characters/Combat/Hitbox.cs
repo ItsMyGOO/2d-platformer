@@ -14,8 +14,12 @@ public partial class Hitbox : Area2D
     private float _knockbackHorizontal;
     private float _knockbackVertical;
 
-    private readonly HashSet<Hurtbox> _hitThisSwing = new();
+    private readonly HashSet<Area2D> _hitThisSwing = new(); // 受击盒与被劈弹体共用（同挥击各一次）
     private ColorRect _debugVisual;
+    private CollisionShape2D _hitShape;
+
+    private static readonly Vector2 SideHitPose = new(22f, 0f);
+    private static readonly Vector2 DownHitPose = new(0f, 26f);
 
     /// <summary>命中确认：每次真实结算成功（非无敌/非尸体拒伤）后触发，表现层用作命中反馈。</summary>
     public event Action HitConfirmed;
@@ -33,6 +37,13 @@ public partial class Hitbox : Area2D
         Monitoring = false;
         Monitorable = false; // 判定框永远只打人不被人打
         _debugVisual = GetNodeOrNull<ColorRect>("DebugVisual");
+        _hitShape = GetNode<CollisionShape2D>("HitShape");
+    }
+
+    /// <summary>切换命中盒朝向：常规侧向 (22,0) ↔ 空中下劈 (0,26)（由 AttackStarted 驱动）。</summary>
+    public void SetDownOrientation(bool down)
+    {
+        _hitShape.Position = down ? DownHitPose : SideHitPose;
     }
 
     /// <summary>开启新一轮挥击：清空已命中集合（由 Motor.AttackStarted 驱动）。</summary>
@@ -79,6 +90,15 @@ public partial class Hitbox : Area2D
                 )
                 {
                     HitConfirmed?.Invoke(); // 只在真实结算（拒伤不计）时确认命中
+                }
+            }
+            else if (area is Projectile projectile)
+            {
+                // 劈碎弹体（下劈 Pogo 借力含弹体）；同挥击只劈一次
+                if (_hitThisSwing.Add(projectile))
+                {
+                    projectile.Struck();
+                    HitConfirmed?.Invoke();
                 }
             }
         }

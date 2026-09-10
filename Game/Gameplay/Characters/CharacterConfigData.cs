@@ -98,6 +98,9 @@ public class CharacterConfigData
 
         /// <summary>攻击冷却（秒），从出招瞬间起算。</summary>
         public float Cooldown { get; init; }
+
+        /// <summary>命中反冲速度（像素/秒）。</summary>
+        public float RecoilVelocity { get; init; }
     }
 
     /// <summary>剑气数值，语义同 <see cref="CastConfig"/> 同名属性。</summary>

@@ -23,6 +23,9 @@ public partial class PlayerInputSource : InputSource
     [Export]
     private string _castAction = "cast";
 
+    [Export]
+    private string _moveDownAction = "move_down";
+
     public override InputIntent Poll(float delta) =>
         InputIntent.Create(
             Input.GetAxis(_moveLeftAction, _moveRightAction),
@@ -30,6 +33,7 @@ public partial class PlayerInputSource : InputSource
             Input.IsActionPressed(_jumpAction),
             Input.IsActionJustPressed(_dashAction),
             Input.IsActionJustPressed(_attackAction),
-            Input.IsActionJustPressed(_castAction)
+            Input.IsActionJustPressed(_castAction),
+            Input.IsActionPressed(_moveDownAction)
         );
 }

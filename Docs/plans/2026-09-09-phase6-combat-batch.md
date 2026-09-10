@@ -254,19 +254,19 @@ git add -A && git commit -m "feat: 轰炸型敌人（弧线炸弹，落点解算
   `if (Motor.AttackDownOriented && !Motor.IsOnFloor) Motor.Bounce();`；
   AttackStarted 时 `_hitbox?.SetDownOrientation(Motor.AttackDownOriented)`）
 
-- [ ] **Step 1: 输入与意图**（move_down 三端 + DownHeld 进意图）
+- [x] **Step 1: 输入与意图**（move_down 三端 + DownHeld 进意图）
 
-- [ ] **Step 2: Motor 三件**（ApplyImpulse / Bounce(−JumpVelocity×0.75) / AttackDownOriented）
+- [x] **Step 2: Motor 三件**（ApplyImpulse / Bounce(−JumpVelocity×0.75) / AttackDownOriented）
 
-- [ ] **Step 3: Hitbox 下向与劈弹**（SetDownOrientation；命中循环加 Projectile 分支；弹体层 32；
+- [x] **Step 3: Hitbox 下向与劈弹**（SetDownOrientation；命中循环加 Projectile 分支；弹体层 32；
   Player Hitbox mask 40；layer_6 命名）
 
-- [ ] **Step 4: Character 接线**（反冲 + Pogo 弹跳 + 攻击开始时切命中盒朝向）
+- [x] **Step 4: Character 接线**（反冲 + Pogo 弹跳 + 攻击开始时切命中盒朝向）
 
 - [x] **Step 5: 单测**：DownHeld 进意图并透传；空中+DownHeld 攻击 → AttackDownOriented=true、
   地面为 false；Bounce 设置上升速度；ApplyImpulse 叠加速度
 
-- [ ] **Step 6: e2e（用后删）**：①空中下劈史莱姆 → 玩家 Vy<0 弹起且史莱姆掉血；
+- [x] **Step 6: e2e（用后删）**：①空中下劈史莱姆 → 玩家 Vy<0 弹起且史莱姆掉血；
   ②下劈飞行中的炸弹 → 炸弹消失且玩家弹起
 
 - [x] **Step 7: 回归 + 提交**

@@ -66,7 +66,11 @@ public partial class Character : CharacterBody2D
         Health.Died += OnDied;
 
         Motor = new CharacterMotor(_config.ToData());
-        Motor.AttackStarted += () => _hitbox?.BeginSwing();
+        Motor.AttackStarted += () =>
+        {
+            _hitbox?.BeginSwing();
+            _hitbox?.SetDownOrientation(Motor.AttackDownOriented); // 下劈切下向命中盒
+        };
         Motor.AttackActiveChanged += active => _hitbox?.SetActive(active);
         if (_config.Attack != null)
         {
@@ -86,6 +90,20 @@ public partial class Character : CharacterBody2D
         if (Motor.Soul != null)
         {
             _hitbox.HitConfirmed += () => Motor.GainSoul(); // 近战命中攒魂
+        }
+
+        if (_config.Attack != null)
+        {
+            // HK 手感件：命中反冲（地面被摩擦自然衰减）+ 空中下劈 Pogo 弹跳（劈弹同样触发）
+            float recoil = _config.Attack.RecoilVelocity;
+            _hitbox.HitConfirmed += () =>
+            {
+                Motor.ApplyImpulse(new Vector2(-Motor.Facing * recoil, 0f));
+                if (Motor.AttackDownOriented && !Motor.IsOnFloor)
+                {
+                    Motor.Bounce();
+                }
+            };
         }
         _presenter?.Bind(Motor, Health);
         _screenShake = this.FindDescendant<ScreenShake>();

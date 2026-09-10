@@ -32,4 +32,8 @@ public partial class AttackConfig : Resource
     /// <summary>攻击冷却（秒），从出招瞬间起算。</summary>
     [Export]
     public float Cooldown { get; set; } = 0.5f;
+
+    /// <summary>命中反冲速度（像素/秒），攻击者被向面朝反方向弹开。</summary>
+    [Export]
+    public float RecoilVelocity { get; set; } = 120f;
 }

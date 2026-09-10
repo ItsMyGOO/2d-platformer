@@ -116,6 +116,7 @@ public partial class CharacterConfig : Resource
                         KnockbackHorizontal = Attack.KnockbackHorizontal,
                         KnockbackVertical = Attack.KnockbackVertical,
                         Cooldown = Attack.Cooldown,
+                        RecoilVelocity = Attack.RecoilVelocity,
                     },
             Cast =
                 Cast == null

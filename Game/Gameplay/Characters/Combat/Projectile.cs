@@ -70,9 +70,12 @@ public partial class Projectile : Area2D
         _damage = damage;
         _knockbackHorizontal = knockbackHorizontal;
         _knockbackVertical = knockbackVertical;
-        CollisionLayer = 0;
+        CollisionLayer = 32u; // 第 6 层 projectile（可被近战劈碎）
         CollisionMask = 1u | targetHurtboxLayer; // 地形 + 目标受击盒
     }
+
+    /// <summary>被近战劈碎（Pogo 借力）：立即销毁。</summary>
+    public void Struck() => QueueFree();
 
     public override void _Ready()
     {
