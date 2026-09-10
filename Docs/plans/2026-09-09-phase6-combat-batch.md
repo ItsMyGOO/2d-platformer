@@ -297,7 +297,7 @@ dotnet test Tests/UnitTests/GodotGameTemplate.UnitTests.csproj -c Release
 "$GODOT" --headless --path . Tools/headless_probe/Probe.tscn; echo "exit=$?"
 ```
 
-- [ ] **Step 3: 推送并确认 CI 绿**
+- [x] **Step 3: 推送并确认 CI 绿**
 
 - [ ] **Step 4: 实机验收（用户参与）**：K 剑气（魂不足拒发、魂条消耗）；近战命中攒魂；
   贴脸砍中敌人自己被轻弹开（反冲）；空中 S/↓+J 下劈史莱姆与炸弹弹跳（Pogo）；
@@ -312,3 +312,32 @@ dotnet test Tests/UnitTests/GodotGameTemplate.UnitTests.csproj -c Release
 - 剑气独立动画（复用攻击动画，正式美术期拆分）、战斗音效（等音频素材）
 - 敌人魂系统、魂的持久化（重生清零即可）
 - Boss / 连击段数（backlog）
+
+---
+
+## 执行记录（2026-09-10 夜间自动化执行）
+
+- **起止时间**：2026-09-10 23:47 – 2026-09-11 00:45（单次无人值守会话，串行于四项目任务中第 2 位）
+- **结果**：✅ Task 1–5 全部完成；Task 6 完成文档同步/全量回归/推送，仅 Step 4 实机验收待用户参与（见遗留）。
+- **验证门槛**：`dotnet csharpier check .` 通过；`dotnet build -c Release` 0 错 0 警（退出码 gate）；
+  xUnit 34→53 全过（Debug/Release 双跑）；无头探针 9/9（退出码 0）；`git push origin main` 成功，
+  GitHub Actions CI run 34503205777 **success**。
+- **每任务独立提交**：feat 弹体弧线+炸弹 / feat 魂量 / feat 剑气 / feat 轰炸敌 / feat 手感件 / docs×2。
+- **执行要点与偏差**：
+  - 环境事实三条全程遵守：构建 gate 一律用退出码（`--no-incremental` 强制重建，防增量构建静默跳过
+    新文件——曾致 e2e 跑到旧程序集）；新增 png/cs/tscn 后先 `--headless --import`（以产物为准，
+    本机 Godot 4.6.1 编辑器布局加载完成后退出时段错误，导入本身成功，不影响后续 headless 运行）；
+    编辑器进程已确认关闭。
+  - e2e 均为临时场景脚本、验证后删除（剑气：命中+扣魂+攒魂接线；轰炸敌：弧线命中玩家掉血；
+    Pogo：下劈史莱姆弹起 + 下劈悬浮炸弹弹起）。
+  - 剑气 e2e 的近战攒魂断言受史莱姆 AI 反击打断影响（玩家受击硬直取消攻击），改为"史莱姆逼近途中
+    节奏出刀"轮询式断言；Pogo e2e 的劈弹分支需从弹体上方下落（下向命中盒先于身体受击盒触及弹体，
+    自下而上跳会被炸弹先炸）；测试弹体 MaxLifetime 置 30s 防寿命到期伪造"被劈碎"。
+  - 文档同步按计划覆盖 architecture §1/§2/§4/§8/§9、README 操作表与玩法段、backlog 勾记与新增挂账
+    （剑气穿透/上劈/炸弹 AoE 与引信动画/剑气蓄力/敌人劈弹免疫开关）。
+- **遗留**：
+  - **Step 4 实机验收（用户参与）未执行**——无人值守会话无法人工验证：K 剑气手感/魂条、贴脸反冲、
+    空中 S+J 下劈、RoomC 轰炸敌落点、手柄 Y 剑气与摇杆下劈、改键页 cast/move_down 两行。请用户
+    实机过一遍上述清单。
+  - 设置页改键行跟随 `RemappableActions` 自动出现 cast/move_down，但 `translations/zh_CN.csv`
+    未补两行的中文显示名（计划未列，回退显示动作名，建议顺手补）。
